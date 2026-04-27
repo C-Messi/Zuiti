@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+}
+
+/* ───── Pet mood-based CSS animations ───── */
+
+@keyframes pet-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-6px) rotate(1deg); }
+  50% { transform: translateY(-2px) rotate(0deg); }
+  75% { transform: translateY(-8px) rotate(-1deg); }
+}
+
+@keyframes pet-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-14px) scale(1.04, 0.96); }
+  50% { transform: translateY(0) scale(0.96, 1.04); }
+  70% { transform: translateY(-8px) scale(1.02, 0.98); }
+}
+
+@keyframes pet-stomp {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  10% { transform: translateX(-5px) rotate(-3deg); }
+  30% { transform: translateX(5px) rotate(3deg); }
+  50% { transform: translateX(-4px) rotate(-2deg); }
+  70% { transform: translateX(3px) rotate(2deg); }
+  90% { transform: translateX(-2px) rotate(-1deg); }
+}
+
+@keyframes pet-cuddle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.05) rotate(2deg); }
+  50% { transform: scale(1.02) rotate(0deg); }
+  75% { transform: scale(1.05) rotate(-2deg); }
+}
+
+@keyframes pet-hungry {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  20% { transform: translateY(2px) rotate(-4deg); }
+  40% { transform: translateY(0) rotate(4deg); }
+  60% { transform: translateY(2px) rotate(-3deg); }
+  80% { transform: translateY(0) rotate(2deg); }
+}
+
+@keyframes pet-sleep {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(2px) scale(1.01, 0.98); }
+}
+
+@keyframes pet-excited {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  15% { transform: translateY(-16px) rotate(5deg) scale(1.05); }
+  30% { transform: translateY(0) rotate(-3deg) scale(0.97); }
+  45% { transform: translateY(-12px) rotate(3deg) scale(1.03); }
+  60% { transform: translateY(0) rotate(-2deg) scale(0.98); }
+  75% { transform: translateY(-8px) rotate(2deg) scale(1.02); }
+  100% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+
+@keyframes pet-sad {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(3px) rotate(-2deg); }
+}
+
+.pet-idle      { animation: pet-float 3s ease-in-out infinite; }
+.pet-happy     { animation: pet-bounce 0.8s ease-in-out infinite; }
+.pet-angry     { animation: pet-stomp 0.4s ease-in-out infinite; }
+.pet-cuddling  { animation: pet-cuddle 1.5s ease-in-out infinite; }
+.pet-hungry    { animation: pet-hungry 1.2s ease-in-out infinite; }
+.pet-sleeping  { animation: pet-sleep 2.5s ease-in-out infinite; }
+.pet-excited   { animation: pet-excited 0.6s ease-in-out infinite; }
+.pet-sad       { animation: pet-sad 2s ease-in-out infinite; }
+
+/* ───── Bubble animations ───── */
+
+@keyframes bubble-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes bubble-out {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-4px) scale(0.95); }
+}
+
+.bubble-enter {
+  animation: bubble-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ───── Setting panel ───── */
+
+@keyframes panel-slide {
+  0% { opacity: 0; transform: translateY(6px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.panel-enter {
+  animation: panel-slide 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ───── Z-Z-Z for sleeping ───── */
+
+@keyframes zzz-float {
+  0% { opacity: 0.7; transform: translate(0, 0) scale(0.8); }
+  100% { opacity: 0; transform: translate(12px, -24px) scale(1.2); }
+}
+
+.zzz {
+  animation: zzz-float 2s ease-out infinite;
+}
+
+/* ───── Input focus glow ───── */
+
+.input-glow:focus {
+  box-shadow: 0 0 0 2px rgba(255, 160, 140, 0.35);
+}
+
+/* ───── Scrollbar (hidden) ───── */
+::-webkit-scrollbar { display: none; }

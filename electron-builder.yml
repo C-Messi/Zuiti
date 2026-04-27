@@ -1,0 +1,42 @@
+appId: cn.zuiti.app
+productName: 嘴替 Sidekick Pet
+directories:
+  output: release
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!scripts/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,DEMO.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!{tailwind.config.js,postcss.config.js,electron-builder.yml}'
+asarUnpack:
+  - resources/**
+extraResources:
+  - { from: resources, to: resources }
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  category: public.app-category.lifestyle
+  icon: build/icon.icns
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSCameraUsageDescription: 嘴替不会主动启用摄像头，仅当你在某个 app 内拍照时被动出现该提示。
+    NSMicrophoneUsageDescription: 嘴替默认不使用麦克风。
+    NSScreenCaptureUsageDescription: 嘴替需要看到你的屏幕，才能在你被老板 push、代码报错、深夜加班时主动陪你。屏幕原图永远不落盘，只有一行去敏感化的语义摘要会与 LLM 通讯。
+  notarize: false
+dmg:
+  artifactName: ${name}-${version}.${ext}
+  contents:
+    - x: 130
+      y: 220
+      type: file
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+npmRebuild: false
+publish: null

@@ -1,0 +1,21 @@
+node_modules
+dist
+out
+release
+.DS_Store
+.eslintcache
+*.log*
+.env
+
+# TypeScript build artifacts
+*.tsbuildinfo
+electron.vite.config.js
+electron.vite.config.d.ts
+
+# Compiled JS/d.ts alongside source .ts (main/preload/shared)
+src/**/*.js
+src/**/*.d.ts
+!src/renderer/src/env.d.ts
+
+# Internal docs
+DEMO.md
