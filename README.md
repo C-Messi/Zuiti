@@ -31,7 +31,7 @@
 ## 开发
 
 ```bash
-git clone https://github.com/Hruish/zuiti.git
+git clone https://github.com/C-Messi/Zuiti.git
 cd zuiti
 npm install
 cp .env.example .env       # 填 LLM_PROVIDER 和 key（mock 也能跑）
