@@ -1,4 +1,4 @@
-# 嘴替 Sidekick Pet
+# 嘴替 Zuiti
 
 > 你的电子宠物，永远站你这边。
 
