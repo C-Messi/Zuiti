@@ -11,11 +11,9 @@ export function BubbleLayer(): React.JSX.Element {
 
   useEffect(() => {
     if (!bubbleVisible) {
-      setShown('')
       idxRef.current = 0
       return
     }
-    setShown('')
     idxRef.current = 0
     const id = setInterval(() => {
       if (idxRef.current >= bubbleText.length) {
@@ -45,7 +43,7 @@ export function BubbleLayer(): React.JSX.Element {
 
   return (
     <div
-      className="absolute top-3 left-3 right-3 flex flex-col items-end gap-2"
+      className="absolute top-3 left-3 right-3 z-30 flex flex-col items-end gap-2"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       {/* Speech bubble */}
@@ -95,8 +93,18 @@ export function BubbleLayer(): React.JSX.Element {
             transition-all duration-200
             disabled:opacity-50 disabled:hover:scale-100"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 2L11 13" /><path d="M22 2L15 22L11 13L2 9L22 2Z" />
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M22 2L11 13" />
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" />
           </svg>
         </button>
       </div>

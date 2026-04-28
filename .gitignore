@@ -19,3 +19,18 @@ src/**/*.d.ts
 
 # Internal docs
 DEMO.md
+
+# Runtime adaptive state
+# SOUL.md is project persona source; generated long-term memory stays local.
+memory/*
+!memory/
+!memory/SOUL.md
+!memory/memory.example.md
+
+# Runtime-generated SVG action skills stay local.
+# Keep one curated example package for contributors.
+skills/*
+!skills/
+!skills/.gitkeep
+!skills/example-soft-wave/
+!skills/example-soft-wave/**

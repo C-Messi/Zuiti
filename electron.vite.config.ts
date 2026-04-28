@@ -11,6 +11,9 @@ export default defineConfig({
   },
   renderer: {
     publicDir: resolve(__dirname, 'resources'),
+    server: {
+      host: '127.0.0.1'
+    },
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),

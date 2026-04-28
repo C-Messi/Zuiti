@@ -45,12 +45,37 @@ export type BrainResponse = {
   dialogue: string
   mood_tag: MoodState
   animation_hint?: string
+  action_intent?: string
+  skill_id?: string
+}
+
+export type SkillIndexItem = {
+  id: string
+  title: string
+  triggers: string[]
+  moodAffinity: MoodState[]
+  durationMs: number
+  reviewScore: number
+  enabled: boolean
+  description: string
+}
+
+export type SkillManifest = SkillIndexItem & {
+  createdAt: string
+}
+
+export type PetAction = {
+  skill_id: string
+  title: string
+  svg: string
+  durationMs: number
 }
 
 export const IPC = {
   USER_SAY: 'user:say',
   PET_SPEAK: 'pet:speak',
   PET_MOOD: 'pet:mood',
+  PET_ACTION: 'pet:action',
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
   VISION_PAUSE: 'vision:pause',

@@ -1,9 +1,12 @@
 import type { BrowserWindow } from 'electron'
 import { observe, getSettings } from '../vision'
-import { respond } from '../brain'
+import { getProvider, respond } from '../brain'
 import { recent, appendEvent } from '../memory/store'
+import { queueMemoryRefresh } from '../memory/analyze'
 import { tokenStateText } from '../token/economy'
 import { getActiveApp } from './triggers'
+import { getContextManager } from '../context/snapshot'
+import { resolveActionForReply } from '../skills/orchestrator'
 import type { TriggerReason } from './triggers'
 import { IPC, type MoodState, type ScreenObservation } from '../../shared/types'
 
@@ -32,6 +35,12 @@ export async function actSpontaneous(win: BrowserWindow, reason: TriggerReason):
   })
   const before = currentMood
   currentMood = reply.mood_tag
+  getContextManager().setMood(reply.mood_tag)
+  getContextManager().appendChatTurn({
+    role: 'pet',
+    text: reply.dialogue,
+    ts: Date.now()
+  })
   appendEvent({
     ts: Date.now(),
     type: reason === 'silence' ? 'spontaneous' : 'reactive',
@@ -45,4 +54,8 @@ export async function actSpontaneous(win: BrowserWindow, reason: TriggerReason):
     win.webContents.send(IPC.PET_MOOD, reply.mood_tag)
     win.webContents.send(IPC.PET_SPEAK, reply.dialogue)
   }
+  queueMemoryRefresh()
+  void resolveActionForReply(reply, getProvider()).then((action) => {
+    if (action && !win.isDestroyed()) win.webContents.send(IPC.PET_ACTION, action)
+  })
 }

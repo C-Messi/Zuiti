@@ -1,82 +1,91 @@
-# 嘴替 Zuiti
+# Zuiti
 
-> 你的电子宠物，永远站你这边。
+**Language**: English | [简体中文](README-zh.md)
 
-不做最聪明的助手，做最懂情绪价值的电子嘴替。它会看着你的屏幕，
-在你被老板 push、代码报错、深夜加班时主动凑过来陪你骂、陪你笑、陪你扛——
-同时像 duolingo 那只绿小鸟一样厚着脸皮缠你互动。
+![Zuiti poster](images/poster.png)
 
-## 三件核心 hook
+🐱 **Zuiti** is an AI desktop pet that lives beside the user's screen in a transparent floating window. It can understand the broad context of the current screen, maintain a compact long-term memory, and respond at the right moment with short natural dialogue and dynamic actions.
 
-1. **窥屏共振**：宠物看到你 IDE 里的报错、微信里的 push、B 站的搞笑片段时，主动接话。屏幕原图永远不落盘、不出本机；只有一行去敏感化的「语义摘要」会与 LLM 通讯。
-2. **主动撒娇**：你 3 分钟没理它，它会先饿瘦，再凑上来撒娇——不是被动等 prompt，而是主动上门。
-3. **token 即猫粮**：每一次你跟它聊天产生的 token，都会变成它的「猫粮」累计。冷落久了它会肉眼可见地饿瘦。
+The project is not trying to wrap a conventional productivity assistant in a cute shell. It explores a more present, more emotionally aware desktop AI companion: one that cares without interrupting too much, uses screen context without feeling like surveillance, and gradually grows its own SVG action skills instead of being limited to fixed assets.
 
-## 安装（macOS）
+See [Project Overview](docs/overview.md) for more context.
 
-1. 在 Releases 中下载 `嘴替 Sidekick Pet-*.dmg`。
-2. 双击挂载，把 app 拖入 Applications。
-3. **首次打开右键 → 打开**（V0 未做代码签名，直接双击会被 Gatekeeper 拦）。
-4. macOS 会请求屏幕录制权限，授予后宠物才能「看见你的屏幕」。
+## ✨ Key Features
 
-## 隐私
+- **Adaptive SVG action skills**: The LLM can generate SVG actions from an action intent, then save them locally under `skills/` after deterministic safety validation and visual review.
+- **Stable context snapshots**: Text replies use the latest completed vision summary, memory, skill index, and short-term chat window without blocking on current screenshot or memory analysis jobs.
+- **Compact long-term memory**: `SOUL.md` stores the pet's persona, while `memory.md` keeps only high-value, low-token long-term preferences and context.
+- **Low-friction screen understanding**: Raw screenshots are not kept as long-term history; the dialogue context receives a sanitized semantic summary instead.
+- **Transparent desktop pet UI**: Electron + React render the default SVG cat, dynamic actions, speech bubbles, input, and lightweight settings.
+- **Local-first runtime state**: Runtime-generated memory and skills are ignored by git by default, keeping personal state local and experiments clean.
 
-- **屏幕原图永远不落盘、不出本机**
-- 仅一行去敏感化的语义摘要 / 用户输入会与 LLM 通讯
-- ⚙ → 一键暂停 30min / 切换温和模式 / 静音模式
-- 自定义 app 黑名单（默认含 1Password、钥匙串、银行类、支付类）
-- 内置红线护栏：去人名 / 去手机号 / 去邮箱 / 去具体身份称呼
-- V0 不提供对话导出 / 分享，避免 AI 言论被截图扩散
-
-## 开发
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/C-Messi/Zuiti.git
-cd zuiti
+cd Zuiti/zuiti-claude-opus-4.7
 npm install
-cp .env.example .env       # 填 LLM_PROVIDER 和 key（mock 也能跑）
-npm run dev                # 开发模式（热重载）
-npm run build:mac          # 打包 dmg
-npm run gen:placeholders   # 重新生成占位 sprite（替换为 AI 美术资产前用）
+cp .env.example .env
+npm run dev
 ```
 
-`.env` 关键变量：
+Important `.env` variables:
 
-| 变量 | 取值 | 说明 |
+| Variable | Values | Description |
 | --- | --- | --- |
-| `LLM_PROVIDER` | `openai` / `anthropic` / `mock` | API 兼容格式，选 `mock` 离线也能跑 |
-| `LLM_BASE_URL` | 例：`https://api.openai.com/v1` | API 基础地址，方便接入第三方兼容服务 |
-| `LLM_API_KEY` | sk-xxx | API 密钥 |
-| `LLM_TEXT_MODEL` | 例：`gpt-4o-mini` | 文本对白模型 |
-| `LLM_VISION_MODEL` | 例：`gpt-4o-mini` | 多模态屏幕情境分析模型 |
+| `LLM_PROVIDER` | `openai` / `anthropic` / `mock` | LLM provider; `mock` can run the base flow offline |
+| `LLM_BASE_URL` | Example: `https://api.openai.com/v1` | API base URL, including compatible providers |
+| `LLM_API_KEY` | `sk-...` | API key |
+| `LLM_TEXT_MODEL` | Example: `gpt-4o-mini` | Model for dialogue, memory, and skill authoring |
+| `LLM_VISION_MODEL` | Example: `gpt-4o-mini` | Model for screenshot summaries and skill review |
 
-## 架构（5 模块）
+Common commands:
 
-```
-PetView ──┐
-          ├── Renderer (React + Tailwind + Zustand)
-BubbleLayer ┘            │ contextBridge
-                         ▼
-              Brain ◀── ipc.ts ──▶ Behavior (triggers / decide)
-                                       │
-              Vision ◀──────────────── ┘
-              Memory + Token (electron-store)
+```bash
+npm run test:unit
+npm run typecheck
+npm run lint
+npm run build
+npm run build:mac
 ```
 
-| 模块 | 单一职责 |
-| --- | --- |
-| **PetView** | 帧动画切换（8 mood × N 帧） |
-| **BubbleLayer** | 对白气泡 + 输入框 + 打字机 |
-| **Brain** | LLM Provider 抽象 + prompt + 红线护栏 |
-| **Vision Pipeline** | 截图 + 隐私过滤 + 多模态 LLM → ScreenObservation |
-| **Behavior Engine** | 周期 / 切窗 / 静默触发 → 决策中枢 |
+See [Development and Configuration](docs/modules/development.md) for more details.
 
-## 致谢
+## 🏗️ Architecture
 
-- 灵感参考：BongoCat / clawd-on-desk / yourfriendly.ai / Duolingo Owl
-- 技术栈：Electron + React + TypeScript + Tailwind + Zustand + electron-store
+![Zuiti architecture](images/architecture.png)
 
-## License
+Zuiti's runtime is composed of the renderer, main process, context snapshot manager, brain agents, vision, memory, and skills. The stable prompt order for the main reply is:
 
-- 应用代码：MIT
-- 视觉资产：占位 PNG (CC0)；正式 AI 美术资产到位后改 CC-BY 4.0
+```text
+SOUL -> memory -> skill index -> recent window -> current event
+```
+
+See [Architecture](docs/architecture.md) for the full design.
+
+## 📚 Modules
+
+| Module | Description | Docs |
+| --- | --- | --- |
+| Renderer | Default cat, dynamic SVG actions, speech bubbles, and settings panel | [docs/modules/renderer.md](docs/modules/renderer.md) |
+| Brain Agents | Prompt and output protocol for textAgent, visionAgent, and memoryAgent | [docs/modules/brain-agents.md](docs/modules/brain-agents.md) |
+| Skills | SVG skill package structure, generation, validation, review, and enablement | [docs/modules/skills.md](docs/modules/skills.md) |
+| Memory | `SOUL.md`, `memory.md`, short-term sliding window, and git policy | [docs/modules/memory.md](docs/modules/memory.md) |
+| Vision | Screenshot capture, privacy filtering, and sanitized screen summaries | [docs/modules/vision.md](docs/modules/vision.md) |
+| Behavior | Proactive triggers, window observation, and interaction pacing | [docs/modules/behavior.md](docs/modules/behavior.md) |
+| Development | Environment variables, commands, and commit notes | [docs/modules/development.md](docs/modules/development.md) |
+
+The repository keeps one example skill at [`skills/example-soft-wave/`](skills/example-soft-wave/) and one example long-term memory file at [`memory/memory.example.md`](memory/memory.example.md). Real runtime-generated `skills/<skill_id>/` packages and `memory/memory.md` are ignored by default.
+
+## 🚶 Roadmap
+
+- **More robust skill review**: Add local pixel checks, style-consistency scoring, and recorded failure reasons.
+- **Action composition**: Support short sequences made from multiple SVG skills instead of playing only one action at a time.
+- **Finer privacy controls**: Provide clearer UI for app blocklists, sensitive windows, and screenshot pause behavior.
+- **Memory review UI**: Add a read-only panel for the current `memory.md`, plus one-click clear or rollback.
+- **Multiple pet personas**: Support switching between different `SOUL.md` templates and companion styles.
+- **Release hardening**: Add macOS signing, notarization, auto-update, and release workflow support.
+
+## 📜 License
+
+Application code is released under the MIT License. Default visuals are repository SVG assets; generated action SVGs are stored locally under `skills/` by default.

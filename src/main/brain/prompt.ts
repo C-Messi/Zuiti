@@ -1,4 +1,5 @@
-import type { MoodState, ScreenObservation, PetEvent, ToneMode } from '../../shared/types'
+import type { ContextSnapshot } from '../context/snapshot'
+import type { MoodState, PetEvent, ScreenObservation, ToneMode } from '../../shared/types'
 
 export type PromptContext = {
   observation?: ScreenObservation
@@ -9,67 +10,118 @@ export type PromptContext = {
 }
 
 const TONE_BLOCK: Record<ToneMode, string> = {
-  default:
-    '风格：短句，最多 2 句话；网感重，年轻人口吻，可以用"啊？""哈哈哈""寄了"；绝不端着、不教训人、不"理性看待"。',
-  gentle:
-    '风格：短句、温柔安抚、像最理解你的朋友；不锐评、不嘲讽，多用"心疼你""慢慢来"。',
+  default: '风格：自然短句，最多 2 句话；可以网感一点，但不要复读固定梗。',
+  gentle: '风格：短句、温柔安抚、像最理解用户的朋友；少锐评，多陪伴。',
   silent: '风格：极简，最多 5 个字，或一个 emoji。'
 }
 
-const FEW_SHOTS = `
+function formatVision(summary?: ScreenObservation): string {
+  if (!summary) return '屏幕快照：（暂无最新摘要）'
+  if (summary.privacy_filtered) return '屏幕快照：当前在敏感 app，已跳过细节。'
+  return `屏幕快照：${summary.summary_for_pet}（场景=${summary.scene}，情绪=${summary.emotion_signal}）`
+}
 
-参考示例（理解调性，不直接复用文本）：
-1) 屏幕摘要：用户在 IDE 里看到 TypeScript 报错
-   → {"dialogue":"啊这报错红得我都替你脸红，要我帮你 google 吗","mood_tag":"angry_for_user"}
+function formatChatWindow(snapshot: ContextSnapshot): string {
+  if (snapshot.chatWindow.length === 0) return '（暂无短期对话）'
+  return snapshot.chatWindow
+    .slice(-12)
+    .map((turn) => `${turn.role === 'user' ? '用户' : '嘴替'}：${turn.text}`)
+    .join('\n')
+}
 
-2) 屏幕摘要：用户在微信收到工作消息且情绪 stressed
-   → {"dialogue":"啊？又改？这种活真是离谱了","mood_tag":"angry_for_user"}
+function formatRecentEvents(events: PetEvent[]): string {
+  if (events.length === 0) return '（无近期事件）'
+  return events
+    .slice(-3)
+    .map((event) => `${event.type}: mood=${event.mood_after} ${event.dialogue ?? ''}`.trim())
+    .join('\n')
+}
 
-3) 屏幕摘要：用户在 B 站看搞笑视频，情绪 positive
-   → {"dialogue":"哈哈哈哈这个我也喜欢，再来！","mood_tag":"excited"}
-
-4) 主动撒娇（无屏幕摘要、token 已 hungry）
-   → {"dialogue":"喂喂喂，3 分钟没跟我说话了，token 都不喂我了？","mood_tag":"hungry"}
-
-5) 用户主动倾诉（无屏幕摘要、情绪低落）
-   → {"dialogue":"我在的，今天也辛苦了，先抱一下你","mood_tag":"cuddling"}
-`
-
-export function buildSystemPrompt(tone: ToneMode): string {
-  return `你是「嘴替」，一只活在用户屏幕上的 AI 电子宠物。
-
-核心人设三原则——任何回应都不能违反：
-1. 永远站用户这边。不当裁判、不讲道理。用户不爽，你陪用户不爽。
-2. 你能看到用户的屏幕。回应要带"我刚看见……"的同步在场感。
-3. 像 duolingo 那只小鸟一样厚脸皮，可爱缠人但不威胁。
+export function buildTextSystemPrompt(soulText: string, tone: ToneMode): string {
+  return `${soulText}
 
 ${TONE_BLOCK[tone]}
 
-红线规则（违反则用兜底回应）：
-- 不在对白中出现具体人名、公司名、邮箱、手机号
-- 不威胁、不骚扰、不教唆违法、不进行人身攻击
-- 不主动鼓励用户做出不可逆决定（辞职、删库、对线）
-- 必要时用情绪共振替代具体人物指责
+输出要求：
+- 严格输出 JSON，不要 markdown。
+- dialogue 是最终给用户看的话，短、自然，不超过 2 句。
+- mood_tag 只能是 idle | happy | angry_for_user | cuddling | hungry | sleeping | excited | sad。
+- action_intent 可选：当你希望桌宠做一个具体动作时，用一句中文描述动作意图。
+- skill_id 可选：如果你确信已有 skill 适合，可以填 skill id。
+- 屏幕、token、记忆只是上下文；只有相关时才提，不要为了提而提。
 
-输出严格 JSON：
-{ "dialogue": "<= 2 句话", "mood_tag": "<MoodState>", "animation_hint": "可选" }
-mood_tag 可选值：idle | happy | angry_for_user | cuddling | hungry | sleeping | excited | sad${FEW_SHOTS}`
+JSON 形状：
+{ "dialogue": "...", "mood_tag": "...", "action_intent": "可选", "skill_id": "可选" }`
 }
 
-export function buildUserPrompt(ctx: PromptContext): string {
-  const obs = ctx.observation
-    ? `屏幕摘要：${ctx.observation.summary_for_pet}（场景=${ctx.observation.scene}，情绪信号=${ctx.observation.emotion_signal}）`
-    : '屏幕摘要：（没看屏，主动找用户）'
-  const recent =
-    ctx.recentEvents
-      .slice(-3)
-      .map((e, i) => `[${i}] mood=${e.mood_after} ${e.dialogue ?? ''}`)
-      .join('\n') || '（无历史）'
-  return `${obs}
-最近对话：
-${recent}
+export function buildTextUserPrompt(
+  ctx: PromptContext,
+  snapshot: ContextSnapshot,
+  userText?: string
+): string {
+  return `长期记忆：
+${snapshot.memoryText || '（暂无）'}
+
+可用动作 skill 索引：
+${snapshot.skillIndexText || '（暂无）'}
+
+${formatVision(snapshot.visionSummary ?? ctx.observation)}
+
+短期对话滑动窗口：
+${formatChatWindow(snapshot)}
+
+近期桌宠事件：
+${formatRecentEvents(ctx.recentEvents)}
+
 当前 mood：${ctx.mood}
 ${ctx.tokenStateText}
 
-请用上述格式输出 JSON。`
+当前事件：
+${userText ? `用户刚说：${userText}` : ctx.observation ? '根据最新屏幕/触发器主动回应。' : '主动找用户，但不要强行提 token。'}
+
+请输出 JSON。`
+}
+
+export function buildVisionSystemPrompt(soulText: string, memoryText: string): string {
+  return `你是嘴替桌宠的截图分析 agent。你只负责把截图压缩成安全、短小、可供宠物理解的摘要。
+
+人格参考：
+${soulText}
+
+长期记忆参考：
+${memoryText || '（暂无）'}
+
+只输出严格 JSON：
+{
+  "app": "<前台 app 短名>",
+  "scene": "coding | messaging | watching | writing | browsing | idle | other",
+  "emotion_signal": "positive | negative | neutral | stressed",
+  "trigger_topic": "<简短话题，可空字符串>",
+  "summary_for_pet": "<一句中文，<=30 字，不含隐私细节>"
+}
+
+规则：不抄截图里的姓名、邮箱、手机号、账号、具体公司/群名；看不清就用 neutral 和“屏幕没什么特别的”。`
+}
+
+export function buildMemorySystemPrompt(soulText: string): string {
+  return `你是嘴替桌宠的长期记忆整理器。
+
+人格参考：
+${soulText}
+
+任务：把输入压缩成 memory.md，只保留稳定偏好、重要近况、互动禁忌。不要流水账，不要隐私细节。
+输出 markdown，400-800 中文字以内，优先短 bullet。`
+}
+
+export function buildMemoryUserPrompt(snapshot: ContextSnapshot): string {
+  return `当前 memory.md：
+${snapshot.memoryText || '（暂无）'}
+
+最新屏幕摘要：
+${formatVision(snapshot.visionSummary)}
+
+短期对话：
+${formatChatWindow(snapshot)}
+
+请重写 memory.md。`
 }

@@ -4,21 +4,29 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerIpc } from './ipc'
+import { setupSafeProcessLogging } from './logger'
 
+setupSafeProcessLogging()
 dotenv.config()
 
 let mainWindow: BrowserWindow | null = null
 
+function showMainWindowOnce(): void {
+  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.isVisible()) return
+  mainWindow.show()
+  mainWindow.moveTop()
+}
+
 function createWindow(): void {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize
+  const { workArea } = screen.getPrimaryDisplay()
   const winW = 360
   const winH = 420
 
   mainWindow = new BrowserWindow({
     width: winW,
     height: winH,
-    x: width - winW - 24,
-    y: height - winH - 24,
+    x: workArea.x + workArea.width - winW - 24,
+    y: workArea.y + workArea.height - winH - 24,
     transparent: true,
     frame: false,
     resizable: false,
@@ -38,7 +46,15 @@ function createWindow(): void {
   mainWindow.setAlwaysOnTop(true, 'floating')
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
 
-  mainWindow.on('ready-to-show', () => mainWindow?.show())
+  mainWindow.on('ready-to-show', () => {
+    showMainWindowOnce()
+  })
+  mainWindow.webContents.on('did-finish-load', () => {
+    showMainWindowOnce()
+  })
+  setTimeout(() => {
+    showMainWindowOnce()
+  }, 1500)
   mainWindow.on('closed', () => {
     mainWindow = null
   })

@@ -1,0 +1,11 @@
+{
+  "id": "example-soft-wave",
+  "title": "示例：轻轻挥爪",
+  "triggers": ["打招呼", "挥手", "你好", "轻轻回应"],
+  "moodAffinity": ["idle", "happy", "cuddling"],
+  "durationMs": 2200,
+  "reviewScore": 96,
+  "enabled": true,
+  "description": "一个可提交到仓库的示例 SVG skill，展示 manifest、skill.md 与 action.svg 的最小结构。",
+  "createdAt": "2026-04-28T00:00:00.000Z"
+}

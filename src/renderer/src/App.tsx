@@ -12,7 +12,7 @@ function App(): React.JSX.Element {
     >
       <BubbleLayer />
       <SettingPanel />
-      <div className="pb-2">
+      <div className="relative z-10 pb-2">
         <PetView />
       </div>
     </div>

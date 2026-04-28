@@ -5,8 +5,7 @@ const FALLBACK_LINES = [
   '没事的，我在这'
 ]
 
-const NAME_LIKE_REGEX =
-  /(@\w+|经理|老板|主管|CEO|总监|[\u4e00-\u9fa5]{2,4}(经理|总|总监|主管))/g
+const NAME_LIKE_REGEX = /(@\w+|经理|老板|主管|CEO|总监|[\u4e00-\u9fa5]{2,4}(经理|总|总监|主管))/g
 const PHONE_REGEX = /\b\d{11}\b/
 const EMAIL_REGEX = /\S+@\S+\.\S+/
 
