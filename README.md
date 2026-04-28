@@ -23,7 +23,7 @@ See [Project Overview](docs/overview.md) for more context.
 
 ```bash
 git clone https://github.com/C-Messi/Zuiti.git
-cd Zuiti/zuiti-claude-opus-4.7
+cd Zuiti
 npm install
 cp .env.example .env
 npm run dev
