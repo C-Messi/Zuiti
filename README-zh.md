@@ -6,13 +6,14 @@
 
 🐱 **Zuiti** 是一个运行在桌面上的 AI 电子宠物。它通过透明悬浮窗口陪在用户屏幕旁，能够理解当前屏幕的大致情境、维护极简长期记忆，并在合适的时候用自然短句和动态动作回应用户。
 
-项目的核心目标不是构建一个传统效率助手，而是探索一种更有在场感、更懂分寸的陪伴型桌面 AI：它会关心用户，但不过度打扰；它能看见上下文，但不制造监控感；它可以逐步沉淀自己的 SVG 动作 skill，让桌宠从固定素材变成可成长的交互体。
+项目的核心目标不是构建一个传统效率助手，而是探索一种更有在场感、更懂分寸的陪伴型桌面 AI：它会关心用户，但不过度打扰；它能看见上下文，但不制造监控感；它通过确定性 SVG 骨架保持宠物本体一致，并逐步沉淀可复用的 SVG 道具 skill。
 
 更多背景见 [项目说明](docs/overview.md)。
 
 ## ✨ 关键特点
 
-- **自适应 SVG 动作 skill**：LLM 可以根据 action intent 生成 SVG 动作，经过安全校验和视觉审核后沉淀到本地 `skills/`。
+- **一致的骨架动作**：LLM 只输出受限 motion plan，React 始终渲染同一只默认猫骨架，并用确定性部件变换表达动作。
+- **自适应 SVG 道具 skill**：LLM 可以生成麦克风、花、牌子等锚点道具，经过安全校验和视觉审核后沉淀到本地 `skills/`。
 - **稳定上下文快照**：文本回复使用最近完成的 vision、memory、skill index 和短期窗口，不阻塞在当前截图或记忆分析上。
 - **极简长期记忆**：`SOUL.md` 保存人格底色，`memory.md` 只保存高价值、低 token 的长期偏好和上下文。
 - **低干扰屏幕理解**：屏幕原图不作为长期历史保存；进入对话上下文的是去敏语义摘要。
@@ -67,15 +68,15 @@ SOUL -> memory -> skill index -> recent window -> current event
 
 | 模块 | 说明 | 文档 |
 | --- | --- | --- |
-| Renderer | 默认猫、动态 SVG action、对白气泡、配置面板 | [docs/modules/renderer.md](docs/modules/renderer.md) |
+| Renderer | 默认猫骨架、确定性 motion、锚点道具、对白气泡、配置面板 | [docs/modules/renderer.md](docs/modules/renderer.md) |
 | Brain Agents | textAgent、visionAgent、memoryAgent 的 prompt 和输出协议 | [docs/modules/brain-agents.md](docs/modules/brain-agents.md) |
-| Skills | SVG skill 包结构、生成、校验、审核、启用 | [docs/modules/skills.md](docs/modules/skills.md) |
+| Skills | 锚点 SVG 道具 skill 包结构、生成、校验、审核、启用 | [docs/modules/skills.md](docs/modules/skills.md) |
 | Memory | `SOUL.md`、`memory.md`、短期滑动窗口和 git 策略 | [docs/modules/memory.md](docs/modules/memory.md) |
 | Vision | 截图获取、隐私过滤、去敏屏幕摘要 | [docs/modules/vision.md](docs/modules/vision.md) |
 | Behavior | 主动触发、窗口观察、节奏控制 | [docs/modules/behavior.md](docs/modules/behavior.md) |
 | Development | 环境变量、命令、提交注意事项 | [docs/modules/development.md](docs/modules/development.md) |
 
-仓库保留一个示范 skill：[`skills/example-soft-wave/`](skills/example-soft-wave/)，以及一个长期记忆示例：[`memory/memory.example.md`](memory/memory.example.md)。真实运行时生成的 `skills/<skill_id>/` 和 `memory/memory.md` 默认被 `.gitignore` 排除。
+仓库保留一个示范道具 skill：[`skills/example-soft-wave/`](skills/example-soft-wave/)，以及一个长期记忆示例：[`memory/memory.example.md`](memory/memory.example.md)。真实运行时生成的 `skills/<skill_id>/` 和 `memory/memory.md` 默认被 `.gitignore` 排除。
 
 ## 🚶 接下来的 Roadmap
 

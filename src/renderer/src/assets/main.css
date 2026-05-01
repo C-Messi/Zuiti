@@ -85,6 +85,93 @@ body,
 .pet-excited   { animation: pet-excited 0.6s ease-in-out infinite; }
 .pet-sad       { animation: pet-sad 2s ease-in-out infinite; }
 
+/* ───── Stable skeleton motion tools ───── */
+
+.zuiti-pet-svg svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+#zuiti-part-head,
+#zuiti-part-face,
+#zuiti-part-left-arm,
+#zuiti-part-right-arm,
+#zuiti-part-tail {
+  transform-box: fill-box;
+}
+
+#zuiti-part-head,
+#zuiti-part-face {
+  transform-origin: 50% 70%;
+}
+
+#zuiti-part-left-arm {
+  transform-origin: 82% 12%;
+}
+
+#zuiti-part-right-arm {
+  transform-origin: 18% 12%;
+}
+
+#zuiti-part-tail {
+  transform-origin: 8% 20%;
+}
+
+@keyframes zuiti-motion-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(var(--motion-scale)); }
+}
+
+@keyframes zuiti-motion-nod {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(var(--motion-angle)); }
+}
+
+@keyframes zuiti-motion-shake-head {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(calc(var(--motion-angle) * -1)); }
+  75% { transform: rotate(var(--motion-angle)); }
+}
+
+@keyframes zuiti-motion-wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(var(--motion-angle)); }
+}
+
+@keyframes zuiti-motion-hop {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  45% { transform: translate(var(--motion-offset-x), var(--motion-offset-y)) scale(var(--motion-scale)); }
+}
+
+.zuiti-motion-idle_breathe .zuiti-pet-svg {
+  animation: zuiti-motion-breathe var(--motion-duration) ease-in-out;
+}
+
+.zuiti-motion-nod #zuiti-part-head,
+.zuiti-motion-nod #zuiti-part-face {
+  animation: zuiti-motion-nod var(--motion-duration) ease-in-out;
+}
+
+.zuiti-motion-shake_head #zuiti-part-head,
+.zuiti-motion-shake_head #zuiti-part-face {
+  animation: zuiti-motion-shake-head var(--motion-duration) ease-in-out;
+}
+
+.zuiti-motion-wave #zuiti-part-right-arm,
+.zuiti-motion-sing #zuiti-part-right-arm {
+  animation: zuiti-motion-wave var(--motion-duration) ease-in-out;
+}
+
+.zuiti-motion-hop .zuiti-pet-svg,
+.zuiti-motion-sing .zuiti-pet-svg {
+  animation: zuiti-motion-hop var(--motion-duration) ease-in-out;
+}
+
+.zuiti-prop-layer {
+  animation: zuiti-motion-breathe 1.4s ease-in-out infinite;
+}
+
 /* ───── Bubble animations ───── */
 
 @keyframes bubble-in {

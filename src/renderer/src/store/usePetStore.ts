@@ -1,24 +1,24 @@
 import { create } from 'zustand'
-import type { MoodState, PetAction } from '../../../shared/types'
+import type { MoodState, PetActivity } from '../../../shared/types'
 
 type State = {
   mood: MoodState
-  activeSkillAction: PetAction | null
+  activeActivity: PetActivity | null
   bubbleText: string
   bubbleVisible: boolean
   setMood: (m: MoodState) => void
-  setActiveSkillAction: (action: PetAction | null) => void
+  setActiveActivity: (activity: PetActivity | null) => void
   setBubble: (t: string) => void
   hideBubble: () => void
 }
 
 export const usePetStore = create<State>((set) => ({
   mood: 'idle',
-  activeSkillAction: null,
+  activeActivity: null,
   bubbleText: '',
   bubbleVisible: false,
   setMood: (m) => set({ mood: m }),
-  setActiveSkillAction: (action) => set({ activeSkillAction: action }),
+  setActiveActivity: (activity) => set({ activeActivity: activity }),
   setBubble: (t) => set({ bubbleText: t, bubbleVisible: true }),
   hideBubble: () => set({ bubbleVisible: false })
 }))

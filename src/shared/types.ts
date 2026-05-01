@@ -41,15 +41,39 @@ export type Settings = {
   appBlacklist: string[]
 }
 
+export type SkeletonId = 'default-cat'
+
+export type PetAnchorId =
+  | 'left_hand'
+  | 'right_hand'
+  | 'head_top'
+  | 'mouth'
+  | 'beside_left'
+  | 'beside_right'
+
+export type MotionToolId = 'idle_breathe' | 'nod' | 'shake_head' | 'wave' | 'hop' | 'sing'
+
+export type PetMotionCommand = {
+  tool: MotionToolId
+  params?: Record<string, number | string>
+  durationMs?: number
+}
+
+export type PetMotionPlan = {
+  skeleton_id: SkeletonId
+  commands: PetMotionCommand[]
+}
+
 export type BrainResponse = {
   dialogue: string
   mood_tag: MoodState
-  animation_hint?: string
-  action_intent?: string
-  skill_id?: string
+  motion_plan?: PetMotionPlan
+  prop_intent?: string
+  prop_skill_id?: string
 }
 
-export type SkillIndexItem = {
+export type PropSkillIndexItem = {
+  kind: 'prop'
   id: string
   title: string
   triggers: string[]
@@ -57,25 +81,34 @@ export type SkillIndexItem = {
   durationMs: number
   reviewScore: number
   enabled: boolean
+  anchor: PetAnchorId
   description: string
 }
 
-export type SkillManifest = SkillIndexItem & {
+export type SkillIndexItem = PropSkillIndexItem
+
+export type SkillManifest = PropSkillIndexItem & {
   createdAt: string
 }
 
-export type PetAction = {
+export type PetProp = {
   skill_id: string
   title: string
   svg: string
   durationMs: number
+  anchor: PetAnchorId
+}
+
+export type PetActivity = {
+  motionPlan: PetMotionPlan
+  prop?: PetProp
 }
 
 export const IPC = {
   USER_SAY: 'user:say',
   PET_SPEAK: 'pet:speak',
   PET_MOOD: 'pet:mood',
-  PET_ACTION: 'pet:action',
+  PET_ACTIVITY: 'pet:activity',
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
   VISION_PAUSE: 'vision:pause',

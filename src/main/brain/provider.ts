@@ -20,9 +20,9 @@ function safeParseBrain(raw: string): BrainResponse {
       return {
         dialogue: obj.dialogue,
         mood_tag: obj.mood_tag,
-        animation_hint: obj.animation_hint,
-        action_intent: obj.action_intent,
-        skill_id: obj.skill_id
+        motion_plan: obj.motion_plan,
+        prop_intent: obj.prop_intent,
+        prop_skill_id: obj.prop_skill_id
       } as BrainResponse
     }
   } catch {
@@ -47,10 +47,10 @@ export function makeMockProvider(): LLMProvider {
       return r
     },
     async visionJSON(system) {
-      if (system.includes('动作视觉审核器')) {
+      if (system.includes('道具视觉审核器')) {
         return {
           score: 88,
-          summary: '动作清晰、风格可爱、安全可用'
+          summary: '道具清晰、锚点合适、安全可用'
         }
       }
       return {
@@ -62,22 +62,23 @@ export function makeMockProvider(): LLMProvider {
       }
     },
     async completeText(system) {
-      if (system.includes('SVG 动作绘制器')) {
+      if (system.includes('SVG 道具绘制器')) {
         return JSON.stringify({
-          id: 'mock-spark-jump',
-          title: 'Mock Spark Jump',
-          triggers: ['开心', '庆祝', '跳一下'],
-          moodAffinity: ['happy', 'excited'],
+          id: 'mock-microphone',
+          title: 'Mock Microphone',
+          triggers: ['唱歌', '麦克风', '开唱'],
+          moodAffinity: ['excited', 'happy'],
+          anchor: 'right_hand',
           durationMs: 1800,
-          description: '开心时带小星星跳一下',
-          skillMarkdown: '- 触发：开心、庆祝、用户完成任务\n- 动作：圆滚滚桌宠带星星轻轻跳起',
-          svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><g><circle cx="128" cy="128" r="58" fill="#fff7ed" stroke="#111827" stroke-width="6"/><circle cx="108" cy="116" r="7" fill="#111827"/><circle cx="148" cy="116" r="7" fill="#111827"/><path d="M104 146 Q128 166 152 146" fill="none" stroke="#111827" stroke-width="6" stroke-linecap="round"/><path d="M70 72 L78 90 L98 92 L82 104 L86 124 L70 114 L52 124 L58 104 L42 92 L62 90 Z" fill="#facc15"/><animateTransform attributeName="transform" type="translate" values="0 0;0 -14;0 0" dur="1.2s" repeatCount="indefinite"/></g></svg>'
+          description: '手持唱歌麦克风道具',
+          skillMarkdown: '- 触发：唱歌、开唱\n- 道具：挂在右手的麦克风\n- 锚点：right_hand',
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><g><rect x="112" y="92" width="32" height="104" rx="14" fill="#111827"/><circle cx="128" cy="74" r="34" fill="#f472b6" stroke="#111827" stroke-width="8"/><path d="M108 69 h40" stroke="#fff7ed" stroke-width="6" stroke-linecap="round" opacity=".72"/><path d="M105 210 h46" stroke="#111827" stroke-width="10" stroke-linecap="round"/></g></svg>'
         })
       }
       if (system.includes('长期记忆整理器')) {
-        return '# 长期记忆\n- 用户喜欢自然、短句、有陪伴感的桌宠。\n- 不要重复 token 喂养梗，屏幕信息只在有用时提。\n- 动作 skill 以 SVG 自动沉淀，审核通过后自动启用。'
+        return '# 长期记忆\n- 用户喜欢自然、短句、有陪伴感的桌宠。\n- 不要重复 token 喂养梗，屏幕信息只在有用时提。\n- 宠物本体由稳定骨架渲染，道具 skill 以 SVG 自动沉淀，审核通过后自动启用。'
       }
-      return '{"dialogue":"在的，我会轻一点但一直在","mood_tag":"cuddling","action_intent":"轻轻抱抱用户"}'
+      return '{"dialogue":"在的，我会轻一点但一直在","mood_tag":"cuddling","motion_plan":{"skeleton_id":"default-cat","commands":[{"tool":"idle_breathe","durationMs":1800,"params":{"intensity":0.5}}]}}'
     }
   }
 }
