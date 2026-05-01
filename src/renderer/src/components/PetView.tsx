@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { usePetStore } from '../store/usePetStore'
-import {
-  DEFAULT_CAT_RESOURCE_PACKAGE,
-  loadDefaultCatSkeletonResourcePackage,
-  renderRegisteredSkeletonMarkup
-} from '../pet/skeletonRegistry'
-import { DEFAULT_CAT_SKELETON } from '../pet/skeleton'
-import type { MoodState, PetActivity, PetAnchorId, PetMotionCommand } from '../../../shared/types'
+import { renderRegisteredSkeletonMarkup } from '../pet/skeletonRegistry'
+import type {
+  MoodState,
+  MotionToolDefinition,
+  PetActivity,
+  PetAnchorId,
+  PetMotionCommand,
+  PetRenderPackage
+} from '../../../shared/types'
 
 const MOOD_CSS_CLASS: Record<MoodState, string> = {
   idle: 'pet-idle',
@@ -19,31 +21,15 @@ const MOOD_CSS_CLASS: Record<MoodState, string> = {
   sad: 'pet-sad'
 }
 
-function numberParam(command: PetMotionCommand | undefined, key: string, fallback: number): number {
-  const value = command?.params?.[key]
-  return typeof value === 'number' ? value : fallback
-}
-
-function motionClass(command: PetMotionCommand | undefined): string {
-  return command ? `zuiti-motion-${command.tool}` : ''
-}
-
-function activityDuration(activity: PetActivity): number {
-  const motionDurations = activity.motionPlan.commands.map((command) => command.durationMs ?? 1400)
+function activityDuration(activity: PetActivity, pkg: PetRenderPackage | null): number {
+  const motionDurations = activity.motionPlan.commands.map((command) => {
+    const tool = pkg?.motionTools.find((item) => item.id === command.tool)
+    return command.durationMs ?? tool?.durationMs ?? 1400
+  })
   return Math.max(activity.prop?.durationMs ?? 0, ...motionDurations, 1000)
 }
 
-function motionStyle(command: PetMotionCommand | undefined): React.CSSProperties {
-  return {
-    '--motion-duration': `${command?.durationMs ?? 1400}ms`,
-    '--motion-angle': `${numberParam(command, 'angleDeg', 8)}deg`,
-    '--motion-offset-x': `${numberParam(command, 'offsetX', 0)}px`,
-    '--motion-offset-y': `${numberParam(command, 'offsetY', -10)}px`,
-    '--motion-scale': `${numberParam(command, 'scale', 1.02)}`
-  } as React.CSSProperties
-}
-
-const PROP_SIZE_BY_ANCHOR: Record<PetAnchorId, number> = {
+const PROP_SIZE_BY_ANCHOR: Record<string, number> = {
   left_hand: 52,
   right_hand: 52,
   head_top: 58,
@@ -61,20 +47,78 @@ function propTransform(anchor: PetAnchorId): string {
   return 'translate(0%, -50%)'
 }
 
+function resolveMotionParams(
+  command: PetMotionCommand,
+  tool: MotionToolDefinition
+): Record<string, number | string> {
+  const params: Record<string, number | string> = {}
+  for (const [key, definition] of Object.entries(tool.params ?? {})) {
+    params[key] = definition.default
+  }
+  for (const [key, value] of Object.entries(command.params ?? {})) {
+    params[key] = value
+  }
+  return params
+}
+
+function resolveTransform(template: string, params: Record<string, number | string>): string {
+  return template.replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (_, key: string) => String(params[key] ?? 0))
+}
+
+function partElement(root: HTMLElement, partId: string): Element | null {
+  if (partId === '__root') return root.querySelector('.zuiti-pet-svg')
+  return root.querySelector(`[id="zuiti-part-${partId.replaceAll('_', '-')}"]`)
+}
+
+function runMotionAnimations(
+  root: HTMLElement | null,
+  pkg: PetRenderPackage | null,
+  activity: PetActivity | null
+): Animation[] {
+  if (!root || !pkg || !activity) return []
+  const animations: Animation[] = []
+  for (const command of activity.motionPlan.commands) {
+    const tool = pkg.motionTools.find((item) => item.id === command.tool)
+    if (!tool) continue
+    const params = resolveMotionParams(command, tool)
+    const repeats = typeof params.repeats === 'number' ? params.repeats : 1
+    for (const target of tool.targets) {
+      const keyframes = target.keyframes.map((keyframe) => ({
+        offset: keyframe.offset,
+        transform: resolveTransform(keyframe.transform, params)
+      }))
+      for (const partId of target.partIds) {
+        const element = partElement(root, partId)
+        if (!element) continue
+        animations.push(
+          element.animate(keyframes, {
+            duration: command.durationMs ?? tool.durationMs,
+            easing: tool.easing,
+            iterations: repeats
+          })
+        )
+      }
+    }
+  }
+  return animations
+}
+
 export function PetView(): React.JSX.Element {
   const mood = usePetStore((s) => s.mood)
   const activeActivity = usePetStore((s) => s.activeActivity)
   const setActiveActivity = usePetStore((s) => s.setActiveActivity)
-  const [skeletonPackage, setSkeletonPackage] = useState(DEFAULT_CAT_RESOURCE_PACKAGE)
+  const [petPackage, setPetPackage] = useState<PetRenderPackage | null>(null)
+  const skeletonRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let alive = true
-    loadDefaultCatSkeletonResourcePackage()
+    window.zuiti
+      .petPackageGet()
       .then((pkg) => {
-        if (alive) setSkeletonPackage(pkg)
+        if (alive) setPetPackage(pkg)
       })
       .catch(() => {
-        /* The built-in fallback keeps the pet visible if public resources fail. */
+        /* The shell remains usable even if the pet package fails to load. */
       })
     return () => {
       alive = false
@@ -83,21 +127,31 @@ export function PetView(): React.JSX.Element {
 
   useEffect(() => {
     if (!activeActivity) return
-    const id = setTimeout(() => {
-      setActiveActivity(null)
-    }, activityDuration(activeActivity))
+    const id = setTimeout(
+      () => {
+        setActiveActivity(null)
+      },
+      activityDuration(activeActivity, petPackage)
+    )
     return () => clearTimeout(id)
-  }, [activeActivity, setActiveActivity])
+  }, [activeActivity, petPackage, setActiveActivity])
 
-  const command = activeActivity?.motionPlan.commands[0]
+  useEffect(() => {
+    const animations = runMotionAnimations(skeletonRef.current, petPackage, activeActivity)
+    return () => {
+      for (const animation of animations) animation.cancel()
+    }
+  }, [activeActivity, petPackage])
+
   const prop = activeActivity?.prop
-  const anchor = prop ? DEFAULT_CAT_SKELETON.anchors[prop.anchor] : null
+  const anchor = prop ? petPackage?.anchors[prop.anchor] : null
   const propSrc = prop ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(prop.svg)}` : null
 
   return (
     <div
-      className={`relative flex items-center justify-center ${motionClass(command)}`}
-      style={{ ...motionStyle(command), WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      ref={skeletonRef}
+      className="relative flex items-center justify-center"
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       {mood === 'sleeping' && (
         <div className="absolute -top-2 right-2 text-lg font-bold text-indigo-300/70 select-none pointer-events-none">
@@ -115,7 +169,9 @@ export function PetView(): React.JSX.Element {
       <div
         className={`zuiti-pet-svg w-44 h-44 select-none drop-shadow-lg transition-all duration-200 ${MOOD_CSS_CLASS[mood]}`}
         aria-label={mood}
-        dangerouslySetInnerHTML={{ __html: renderRegisteredSkeletonMarkup(skeletonPackage, mood) }}
+        dangerouslySetInnerHTML={{
+          __html: petPackage ? renderRegisteredSkeletonMarkup(petPackage, mood) : ''
+        }}
       />
       {prop && anchor && propSrc && (
         <img
@@ -126,8 +182,8 @@ export function PetView(): React.JSX.Element {
           style={{
             left: `${(anchor.x / 256) * 100}%`,
             top: `${(anchor.y / 256) * 100}%`,
-            width: PROP_SIZE_BY_ANCHOR[prop.anchor],
-            height: PROP_SIZE_BY_ANCHOR[prop.anchor],
+            width: PROP_SIZE_BY_ANCHOR[prop.anchor] ?? 52,
+            height: PROP_SIZE_BY_ANCHOR[prop.anchor] ?? 52,
             transform: propTransform(prop.anchor)
           }}
         />

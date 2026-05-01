@@ -12,10 +12,10 @@
 
 ## ✨ 关键特点
 
-- **一致的骨架动作**：LLM 只输出受限 motion plan，React 始终渲染同一只默认猫骨架，并用确定性部件变换表达动作。
-- **自适应 SVG 道具 skill**：LLM 可以生成麦克风、花、牌子等锚点道具，经过安全校验和视觉审核后沉淀到本地 `skills/`。
+- **完整宠物包**：active pet 从 `pet_resources/pets/<pet_id>/` 加载骨架 SVG、表情、锚点、motion tools、motion prompt、memory 和道具 skills。
+- **自适应 SVG 道具 skill**：LLM 可以生成麦克风、花、牌子等锚点道具，经过安全校验和视觉审核后沉淀到当前宠物包。
 - **稳定上下文快照**：文本回复使用最近完成的 vision、memory、skill index 和短期窗口，不阻塞在当前截图或记忆分析上。
-- **极简长期记忆**：`SOUL.md` 保存人格底色，`memory.md` 只保存高价值、低 token 的长期偏好和上下文。
+- **极简长期记忆**：每个宠物包拥有自己的 `SOUL.md`，运行时 `memory.md` 只保存高价值、低 token 的长期偏好和上下文。
 - **低干扰屏幕理解**：屏幕原图不作为长期历史保存；进入对话上下文的是去敏语义摘要。
 - **透明桌宠界面**：Electron + React 渲染默认 SVG 猫、动态 action、对白气泡和轻量配置面板。
 - **本地优先状态管理**：运行时生成的 memory 和 skill 默认不进入 git，便于隐私隔离和本地实验。
@@ -32,13 +32,14 @@ npm run dev
 
 `.env` 关键配置：
 
-| 变量 | 取值 | 说明 |
-| --- | --- | --- |
-| `LLM_PROVIDER` | `openai` / `anthropic` / `mock` | LLM provider；`mock` 可离线启动基础流程 |
-| `LLM_BASE_URL` | 例如 `https://api.openai.com/v1` | API 基础地址，支持兼容服务 |
-| `LLM_API_KEY` | `sk-...` | API key |
-| `LLM_TEXT_MODEL` | 例如 `gpt-4o-mini` | 文本对话、memory、skill author 模型 |
-| `LLM_VISION_MODEL` | 例如 `gpt-4o-mini` | 截图摘要和 skill review 模型 |
+| 变量               | 取值                             | 说明                                     |
+| ------------------ | -------------------------------- | ---------------------------------------- |
+| `ENABLED_PET`      | 例如 `default-cat`               | `pet_resources/pets/` 下的 active pet 包 |
+| `LLM_PROVIDER`     | `openai` / `anthropic` / `mock`  | LLM provider；`mock` 可离线启动基础流程  |
+| `LLM_BASE_URL`     | 例如 `https://api.openai.com/v1` | API 基础地址，支持兼容服务               |
+| `LLM_API_KEY`      | `sk-...`                         | API key                                  |
+| `LLM_TEXT_MODEL`   | 例如 `gpt-4o-mini`               | 文本对话、memory、skill author 模型      |
+| `LLM_VISION_MODEL` | 例如 `gpt-4o-mini`               | 截图摘要和 skill review 模型             |
 
 常用命令：
 
@@ -66,17 +67,17 @@ SOUL -> memory -> skill index -> recent window -> current event
 
 ## 📚 模块说明
 
-| 模块 | 说明 | 文档 |
-| --- | --- | --- |
-| Renderer | 默认猫骨架、确定性 motion、锚点道具、对白气泡、配置面板 | [docs/modules/renderer.md](docs/modules/renderer.md) |
-| Brain Agents | textAgent、visionAgent、memoryAgent 的 prompt 和输出协议 | [docs/modules/brain-agents.md](docs/modules/brain-agents.md) |
-| Skills | 锚点 SVG 道具 skill 包结构、生成、校验、审核、启用 | [docs/modules/skills.md](docs/modules/skills.md) |
-| Memory | `SOUL.md`、`memory.md`、短期滑动窗口和 git 策略 | [docs/modules/memory.md](docs/modules/memory.md) |
-| Vision | 截图获取、隐私过滤、去敏屏幕摘要 | [docs/modules/vision.md](docs/modules/vision.md) |
-| Behavior | 主动触发、窗口观察、节奏控制 | [docs/modules/behavior.md](docs/modules/behavior.md) |
-| Development | 环境变量、命令、提交注意事项 | [docs/modules/development.md](docs/modules/development.md) |
+| 模块         | 说明                                                      | 文档                                                         |
+| ------------ | --------------------------------------------------------- | ------------------------------------------------------------ |
+| Renderer     | 宠物包渲染、数据驱动 motion、锚点道具、对白气泡、配置面板 | [docs/modules/renderer.md](docs/modules/renderer.md)         |
+| Brain Agents | textAgent、visionAgent、memoryAgent 的 prompt 和输出协议  | [docs/modules/brain-agents.md](docs/modules/brain-agents.md) |
+| Skills       | 锚点 SVG 道具 skill 包结构、生成、校验、审核、启用        | [docs/modules/skills.md](docs/modules/skills.md)             |
+| Memory       | `SOUL.md`、`memory.md`、短期滑动窗口和 git 策略           | [docs/modules/memory.md](docs/modules/memory.md)             |
+| Vision       | 截图获取、隐私过滤、去敏屏幕摘要                          | [docs/modules/vision.md](docs/modules/vision.md)             |
+| Behavior     | 主动触发、窗口观察、节奏控制                              | [docs/modules/behavior.md](docs/modules/behavior.md)         |
+| Development  | 环境变量、命令、提交注意事项                              | [docs/modules/development.md](docs/modules/development.md)   |
 
-仓库保留一个示范道具 skill：[`skills/example-soft-wave/`](skills/example-soft-wave/)，以及一个长期记忆示例：[`memory/memory.example.md`](memory/memory.example.md)。真实运行时生成的 `skills/<skill_id>/` 和 `memory/memory.md` 默认被 `.gitignore` 排除。
+仓库保留一个示范道具 skill：[`pet_resources/pets/default-cat/skills/example-soft-wave/`](pet_resources/pets/default-cat/skills/example-soft-wave/)，以及一个长期记忆示例：[`pet_resources/pets/default-cat/memory/memory.example.md`](pet_resources/pets/default-cat/memory/memory.example.md)。真实运行时生成的宠物包 skills 和 `memory.md` 默认被 `.gitignore` 排除。
 
 ## 🚶 接下来的 Roadmap
 
@@ -89,4 +90,4 @@ SOUL -> memory -> skill index -> recent window -> current event
 
 ## 📜 License
 
-应用代码使用 MIT License。默认视觉为仓库内 SVG；自动生成的 action SVG 默认保存在本地 `skills/`。
+应用代码使用 MIT License。默认视觉为仓库内 SVG；自动生成的道具 SVG 默认保存在当前宠物包本地目录。

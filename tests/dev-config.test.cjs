@@ -9,6 +9,12 @@ test('electron vite dev server binds IPv4 localhost instead of ::1', () => {
   assert.match(source, /host:\s*'127\.0\.0\.1'/)
 })
 
+test('.env.example documents the active pet package selector', () => {
+  const source = fs.readFileSync(path.join(process.cwd(), '.env.example'), 'utf8')
+
+  assert.match(source, /^ENABLED_PET=default-cat$/m)
+})
+
 test('stale generated electron vite js config does not shadow ts config', () => {
   assert.equal(fs.existsSync(path.join(process.cwd(), 'electron.vite.config.js')), false)
   assert.equal(fs.existsSync(path.join(process.cwd(), 'electron.vite.config.d.ts')), false)

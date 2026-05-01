@@ -12,13 +12,16 @@ const {
   writeMemoryText
 } = require('../src/main/memory/files')
 
-test('ensureMemoryFiles creates only SOUL.md and memory.md in memory directory', () => {
+test('ensureMemoryFiles creates pet-owned SOUL.md and memory.md under pet_resources', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'zuiti-memory-'))
 
   ensureMemoryFiles(root)
 
-  const names = fs.readdirSync(path.join(root, 'memory')).sort()
+  const names = fs
+    .readdirSync(path.join(root, 'pet_resources', 'pets', 'default-cat', 'memory'))
+    .sort()
   assert.deepEqual(names, ['SOUL.md', 'memory.md'])
+  assert.equal(fs.existsSync(path.join(root, 'memory')), false)
 })
 
 test('writeMemoryText keeps long-term memory inside compact budget', () => {

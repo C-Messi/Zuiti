@@ -18,13 +18,14 @@ npm run dev
 
 ## 环境变量
 
-| 变量 | 取值 | 说明 |
-| --- | --- | --- |
-| `LLM_PROVIDER` | `openai` / `anthropic` / `mock` | LLM provider |
-| `LLM_BASE_URL` | 例如 `https://api.openai.com/v1` | API 基础地址 |
-| `LLM_API_KEY` | `sk-...` | API key |
-| `LLM_TEXT_MODEL` | 例如 `gpt-4o-mini` | 文本 agent 模型 |
-| `LLM_VISION_MODEL` | 例如 `gpt-4o-mini` | vision / review 模型 |
+| 变量               | 取值                             | 说明                 |
+| ------------------ | -------------------------------- | -------------------- |
+| `ENABLED_PET`      | 例如 `default-cat`               | active pet 包 id     |
+| `LLM_PROVIDER`     | `openai` / `anthropic` / `mock`  | LLM provider         |
+| `LLM_BASE_URL`     | 例如 `https://api.openai.com/v1` | API 基础地址         |
+| `LLM_API_KEY`      | `sk-...`                         | API key              |
+| `LLM_TEXT_MODEL`   | 例如 `gpt-4o-mini`               | 文本 agent 模型      |
+| `LLM_VISION_MODEL` | 例如 `gpt-4o-mini`               | vision / review 模型 |
 
 ## 常用命令
 
@@ -41,17 +42,17 @@ npm run build:mac
 
 `.gitignore` 会排除运行时生成的：
 
-- `memory/memory.md`
-- `skills/<runtime-generated-skill>/`
+- `pet_resources/pets/<pet_id>/memory/memory.md`
+- `pet_resources/pets/<pet_id>/skills/<runtime-generated-skill>/`
 
 仓库保留：
 
-- `memory/SOUL.md`
-- `memory/memory.example.md`
-- `skills/example-soft-wave/`
+- `pet_resources/pets/default-cat/memory/SOUL.md`
+- `pet_resources/pets/default-cat/memory/memory.example.md`
+- `pet_resources/pets/default-cat/skills/example-soft-wave/`
 - `resources/icon.png`
-- `pet_resources/` 下的内置宠物骨架资源与 `PET_SKELETON_STANDARD.md`
+- `pet_resources/` 下的内置宠物包资源与 `PET_SKELETON_STANDARD.md`
 
-`resources/` 保留给 Electron 图标和构建资源。renderer 的 publicDir 使用 `pet_resources/`，宠物骨架 manifest、部件 SVG、动作说明和 prompt 标准都应放在 `pet_resources/` 下。
+`resources/` 保留给 Electron 图标和构建资源。`pet_resources/` 是主进程加载的宠物包根；renderer 不把整个目录作为 publicDir 暴露，避免 runtime memory 和生成 skills 被当成静态资源访问。
 
 提交前建议运行 `npm run test:unit && npm run typecheck && npm run lint && npm run build`。

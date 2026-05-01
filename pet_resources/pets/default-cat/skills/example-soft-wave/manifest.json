@@ -8,6 +8,6 @@
   "durationMs": 2200,
   "reviewScore": 96,
   "enabled": true,
-  "description": "一个可提交到仓库的示例 SVG 道具 skill，展示 manifest、skill.md 与 prop.svg 的最小结构。",
+  "description": "一个可提交到宠物包的示例 SVG 道具 skill，展示 manifest、skill.md 与 prop.svg 的最小结构。",
   "createdAt": "2026-04-28T00:00:00.000Z"
 }

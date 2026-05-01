@@ -10,6 +10,7 @@ export type ContextSnapshot = {
   soulText: string
   memoryText: string
   skillIndexText: string
+  motionPromptText: string
   visionSummary?: ScreenObservation
   chatWindow: ChatTurn[]
   mood?: MoodState
@@ -20,6 +21,7 @@ type ContextSnapshotManagerOptions = {
   soulText: string
   memoryText: string
   skillIndexText: string
+  motionPromptText?: string
 }
 
 const DEFAULT_MAX_CHAT_TURNS = 12
@@ -29,6 +31,7 @@ export class ContextSnapshotManager {
   private soulText: string
   private memoryText: string
   private skillIndexText: string
+  private motionPromptText: string
   private visionSummary?: ScreenObservation
   private chatWindow: ChatTurn[] = []
   private mood?: MoodState
@@ -38,6 +41,7 @@ export class ContextSnapshotManager {
     this.soulText = options.soulText
     this.memoryText = options.memoryText
     this.skillIndexText = options.skillIndexText
+    this.motionPromptText = options.motionPromptText ?? ''
   }
 
   setSoulText(text: string): void {
@@ -50,6 +54,10 @@ export class ContextSnapshotManager {
 
   setSkillIndexText(text: string): void {
     this.skillIndexText = text
+  }
+
+  setMotionPromptText(text: string): void {
+    this.motionPromptText = text
   }
 
   setVisionSummary(summary: ScreenObservation | undefined): void {
@@ -70,6 +78,7 @@ export class ContextSnapshotManager {
       soulText: this.soulText,
       memoryText: this.memoryText,
       skillIndexText: this.skillIndexText,
+      motionPromptText: this.motionPromptText,
       visionSummary: this.visionSummary,
       chatWindow: [...this.chatWindow],
       mood: this.mood
@@ -81,7 +90,8 @@ let singleton = new ContextSnapshotManager({
   maxChatTurns: DEFAULT_MAX_CHAT_TURNS,
   soulText: '',
   memoryText: '',
-  skillIndexText: ''
+  skillIndexText: '',
+  motionPromptText: ''
 })
 
 export function getContextManager(): ContextSnapshotManager {

@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { petMemoryDir } from '../pet/package'
 
 export const MEMORY_BUDGET_CHARS = 800
-export const MEMORY_DIR_NAME = 'memory'
 export const SOUL_FILE_NAME = 'SOUL.md'
 export const MEMORY_FILE_NAME = 'memory.md'
 
@@ -31,7 +31,7 @@ const DEFAULT_MEMORY = `# 长期记忆
 `
 
 function memoryDir(root = process.cwd()): string {
-  return join(root, MEMORY_DIR_NAME)
+  return petMemoryDir(root)
 }
 
 function soulPath(root = process.cwd()): string {

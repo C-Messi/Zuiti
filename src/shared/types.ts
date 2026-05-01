@@ -41,26 +41,53 @@ export type Settings = {
   appBlacklist: string[]
 }
 
-export type SkeletonId = 'default-cat'
+export type SkeletonId = string
 
-export type PetAnchorId =
-  | 'left_hand'
-  | 'right_hand'
-  | 'head_top'
-  | 'mouth'
-  | 'beside_left'
-  | 'beside_right'
+export type PetAnchorId = string
 
-export type MotionToolId =
-  | 'idle_breathe'
-  | 'nod'
-  | 'shake_head'
-  | 'wave'
-  | 'hop'
-  | 'sing'
-  | 'tilt_head'
-  | 'perk_ears'
-  | 'swish_tail'
+export type MotionToolId = string
+
+export type SkeletonPoint = {
+  x: number
+  y: number
+}
+
+export type PetPartDefinition = {
+  id: string
+  label: string
+  svg: string
+  transformOrigin: string
+}
+
+export type PetExpressionDefinition = {
+  partId: string
+  svg: string
+}
+
+export type MotionParamDefinition = {
+  default: number
+  min: number
+  max: number
+}
+
+export type MotionKeyframeDefinition = {
+  offset: number
+  transform: string
+}
+
+export type MotionTargetDefinition = {
+  partIds: string[]
+  keyframes: MotionKeyframeDefinition[]
+}
+
+export type MotionToolDefinition = {
+  id: MotionToolId
+  prompt: string
+  durationMs: number
+  easing: string
+  params: Record<string, MotionParamDefinition>
+  targets: MotionTargetDefinition[]
+}
 
 export type PetMotionCommand = {
   tool: MotionToolId
@@ -71,6 +98,20 @@ export type PetMotionCommand = {
 export type PetMotionPlan = {
   skeleton_id: SkeletonId
   commands: PetMotionCommand[]
+}
+
+export type PetRenderPackage = {
+  id: SkeletonId
+  title: string
+  viewBox: string
+  ariaLabel: string
+  parts: Record<string, PetPartDefinition>
+  expressions: Partial<Record<MoodState, PetExpressionDefinition>>
+  anchors: Record<PetAnchorId, SkeletonPoint>
+  renderOrder: string[]
+  motionTools: MotionToolDefinition[]
+  moodDefaults: Record<MoodState, PetMotionPlan>
+  motionPromptText: string
 }
 
 export type BrainResponse = {
@@ -118,6 +159,7 @@ export const IPC = {
   PET_SPEAK: 'pet:speak',
   PET_MOOD: 'pet:mood',
   PET_ACTIVITY: 'pet:activity',
+  PET_PACKAGE_GET: 'pet:package:get',
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
   VISION_PAUSE: 'vision:pause',

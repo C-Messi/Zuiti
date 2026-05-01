@@ -2,6 +2,7 @@ import type { LLMProvider } from '../brain/provider'
 import { getContextManager } from '../context/snapshot'
 import { getRuntimeRoot, refreshRuntimeSkillIndex } from '../context/runtime'
 import { normalizeMotionPlan } from '../motion/validate'
+import { loadPetPackage } from '../pet/package'
 import type { BrainResponse, PetActivity, PetProp } from '../../shared/types'
 import { authorSkillDraft, draftToManifest } from './author'
 import { reviewSkillDraft } from './review'
@@ -40,7 +41,8 @@ export async function resolveActivityForReply(
   provider: LLMProvider,
   root = getRuntimeRoot()
 ): Promise<PetActivity> {
-  const motionPlan = normalizeMotionPlan(reply.motion_plan, reply.mood_tag)
+  const petPackage = loadPetPackage(root)
+  const motionPlan = normalizeMotionPlan(reply.motion_plan, reply.mood_tag, petPackage)
   const index = loadSkillIndex(root)
   const selection = selectSkill(index, {
     requestedSkillId: reply.prop_skill_id,

@@ -1,52 +1,54 @@
-# Zuiti Pet Skeleton Resource Standard
+# Zuiti Pet Package Standard
 
-This directory contains renderer-served pet skeleton resources. Electron app icons and build assets stay in `resources/`; pet skeleton parts, motion metadata, and prompt-facing notes stay in `pet_resources/`.
+`pet_resources/` is the canonical pet package root. A pet package contains its complete skeleton, expression SVGs, prop skills, memory seed files, motion tool definitions, and prompt-facing motion descriptions.
+
+Renderer code must not expose the whole `pet_resources/` directory as a public asset root. The main process loads and validates pet packages, then sends a read-only render package to the renderer over IPC. Runtime memory and generated skills remain main-process private state.
 
 ## Directory Layout
 
 ```text
 pet_resources/
   PET_SKELETON_STANDARD.md
-  skeletons/<skeleton_id>/
+  pets/<pet_id>/
     manifest.json
-    parts/
-      head.svg
-      ears.svg
-      tail.svg
+    skeleton/
+      parts/*.svg
+      expressions/*.svg
+    memory/
+      SOUL.md
+      memory.example.md
+      memory.md        # runtime-local, ignored
+    skills/
+      example-soft-wave/
+        manifest.json
+        skill.md
+        prop.svg
 ```
 
 ## Manifest Data
 
-`manifest.json` is the resource index for one skeleton. It must declare:
+`manifest.json` must declare:
 
-- `id`: currently `default-cat`.
-- `requiredParts`: part ids that must load before the resource package is accepted.
-- `renderOrder`: stable SVG group order, including generated static parts and resource parts.
-- `parts`: per-part data with `label`, relative SVG `path`, and CSS `transformOrigin`.
-- `motionTools`: semantic motion tools that the LLM may request.
-
-The renderer loads the manifest first, then loads each declared SVG path. If any required part is missing or unsafe, the system falls back to the built-in default cat markup.
+- `id`, `title`, `viewBox`, and `ariaLabel`.
+- `parts`: every renderable skeleton component with `label`, relative SVG `path`, and `transformOrigin`.
+- `expressions`: mood-specific replacement SVGs for expression parts such as `face`.
+- `anchors`: prop anchor coordinates owned by the current pet.
+- `renderOrder`: stable SVG group order; every entry must exist in `parts`.
+- `motionTools`: semantic tools with `id`, `prompt`, parameter limits, default duration, targets, and transform keyframes.
+- `moodDefaults`: fallback `motion_plan` per mood, using only registered tools.
 
 ## SVG Parts
 
-Each part SVG file contains a single transparent SVG group, not a full `<svg>` document. The group id must be stable:
+Each skeleton part file contains a single transparent SVG group, not a full `<svg>` document. The group id must follow `zuiti-part-<part-id-with-dashes>`, for example `left_foot` uses `<g id="zuiti-part-left-foot">`.
 
-- `head.svg`: `<g id="zuiti-part-head">...</g>`
-- `ears.svg`: `<g id="zuiti-part-ears">...</g>`
-- `tail.svg`: `<g id="zuiti-part-tail">...</g>`
-
-Part SVGs must not include scripts, `foreignObject`, event attributes, external links, remote resources, or data URL resources. The art style for the default cat is a high-consistency cow-cat style: thick dark outline, cream fill, black patches, and soft pink ear or tail accents.
+Part and expression SVGs must not include scripts, `foreignObject`, event attributes, external links, remote resources, data URL resources, or embedded images.
 
 ## Motion Tools
 
-Motion tools are semantic, not freeform transforms. The current part-specific tools are:
+Motion tools are data, not system code. Each tool declares prompt guidance, numeric parameter ranges, target part ids, and transform-only keyframes. Targets may use `__root` for the whole rendered pet or concrete part ids from `parts`.
 
-- `tilt_head`: rotates `head`, `face`, and `ears` together.
-- `perk_ears`: lifts and rotates `ears`.
-- `swish_tail`: rotates `tail`.
+The LLM may only request `motion_plan: { skeleton_id, commands }` using tools registered by the active pet package. It must not emit raw SVG, arbitrary CSS, arbitrary transforms, file paths, or unregistered part ids.
 
-New parts may add new semantic tools, but those tools must also be added to shared types, main-process validation, renderer CSS, and prompt instructions.
+## Memory And Skills
 
-## Prompt Boundary
-
-Prompt text should expose only the registered semantic `motionTools`. The LLM must keep using `motion_plan: { skeleton_id, commands }` and must not emit raw SVG, arbitrary CSS, arbitrary transforms, file paths, or unregistered part ids.
+`memory/SOUL.md` is the pet persona source. `memory/memory.md` is runtime-generated long-term memory and must stay local. Prop skills live under the pet package `skills/` directory so each pet carries its own learned props and anchors.

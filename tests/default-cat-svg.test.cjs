@@ -3,13 +3,14 @@ const fs = require('node:fs')
 const path = require('node:path')
 const test = require('node:test')
 
+const { loadPetPackage } = require('../src/main/pet/package')
 const {
-  buildDefaultCatSvg,
-  buildDefaultCatSvgDataUrl,
-  buildDefaultCatSvgMarkup
-} = require('../src/renderer/src/pet/defaultCatSvg')
+  loadPetRenderPackage,
+  renderRegisteredSkeletonMarkup
+} = require('../src/renderer/src/pet/skeletonRegistry')
 
-test('buildDefaultCatSvg draws a standalone safe cat svg for every mood', () => {
+test('default cat pet package renders standalone safe svg for every mood', () => {
+  const pkg = loadPetRenderPackage(loadPetPackage(process.cwd()))
   const moods = [
     'idle',
     'happy',
@@ -22,7 +23,7 @@ test('buildDefaultCatSvg draws a standalone safe cat svg for every mood', () => 
   ]
 
   for (const mood of moods) {
-    const svg = buildDefaultCatSvg(mood)
+    const svg = renderRegisteredSkeletonMarkup(pkg, mood)
     assert.match(svg, /^<svg /)
     assert.match(svg, /viewBox="0 0 256 256"/)
     assert.match(svg, /奶牛猫|cow-cat|cat/i)
@@ -31,15 +32,11 @@ test('buildDefaultCatSvg draws a standalone safe cat svg for every mood', () => 
   }
 })
 
-test('buildDefaultCatSvgDataUrl returns inline svg data url', () => {
-  const url = buildDefaultCatSvgDataUrl('happy')
-
-  assert.match(url, /^data:image\/svg\+xml;charset=utf-8,/)
-  assert.match(decodeURIComponent(url), /<svg /)
-})
-
-test('buildDefaultCatSvgMarkup exposes stable transformable part groups', () => {
-  const markup = buildDefaultCatSvgMarkup('excited')
+test('pet package markup exposes stable transformable part groups', () => {
+  const markup = renderRegisteredSkeletonMarkup(
+    loadPetRenderPackage(loadPetPackage(process.cwd())),
+    'excited'
+  )
 
   for (const id of [
     'zuiti-part-body',
@@ -68,5 +65,5 @@ test('PetView no longer replaces pet with full action svgs', () => {
   assert.doesNotMatch(source, /data:image\/svg\+xml;charset=utf-8,\$\{encodeURIComponent\(active/)
   assert.match(source, /activeActivity/)
   assert.match(source, /renderRegisteredSkeletonMarkup/)
-  assert.match(source, /loadDefaultCatSkeletonResourcePackage/)
+  assert.match(source, /petPackageGet/)
 })

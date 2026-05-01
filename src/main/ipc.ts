@@ -9,6 +9,8 @@ import { getContextManager } from './context/snapshot'
 import { resolveActivityForReply } from './skills/orchestrator'
 import { startTriggers, actSpontaneous, noteUserInteraction, getMood, setMood } from './behavior'
 import { getSettings, patchSettings } from './vision'
+import { getRuntimeRoot } from './context/runtime'
+import { loadPetPackage } from './pet/package'
 
 export function registerIpc(win: BrowserWindow): void {
   initializeRuntimeContext()
@@ -53,6 +55,7 @@ export function registerIpc(win: BrowserWindow): void {
     return { ok: true }
   })
 
+  ipcMain.handle(IPC.PET_PACKAGE_GET, () => loadPetPackage(getRuntimeRoot()))
   ipcMain.handle(IPC.SETTINGS_GET, () => getSettings())
   ipcMain.handle(IPC.SETTINGS_SET, (_e, p: Partial<Settings>) => patchSettings(p))
   ipcMain.handle(IPC.VISION_PAUSE, (_e, durationMs: number | null) =>

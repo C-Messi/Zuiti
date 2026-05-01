@@ -20,17 +20,14 @@ src/**/*.d.ts
 # Internal docs
 DEMO.md
 
-# Runtime adaptive state
-# SOUL.md is project persona source; generated long-term memory stays local.
-memory/*
-!memory/
-!memory/SOUL.md
-!memory/memory.example.md
+# Runtime adaptive state lives inside the active pet package.
+# SOUL.md and memory examples are source; generated long-term memory stays local.
+pet_resources/pets/*/memory/memory.md
+/memory/
+/skills/
 
-# Runtime-generated SVG action skills stay local.
-# Keep one curated example package for contributors.
-skills/*
-!skills/
-!skills/.gitkeep
-!skills/example-soft-wave/
-!skills/example-soft-wave/**
+# Runtime-generated SVG prop skills stay local.
+# Keep curated example packages for contributors.
+pet_resources/pets/*/skills/*
+!pet_resources/pets/*/skills/example-soft-wave/
+!pet_resources/pets/*/skills/example-soft-wave/**

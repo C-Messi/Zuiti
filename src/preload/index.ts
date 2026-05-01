@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { IPC, type PetActivity, type Settings } from '../shared/types'
+import { IPC, type PetActivity, type PetRenderPackage, type Settings } from '../shared/types'
 
 const api = {
   userSay: (text: string): Promise<{ ok: boolean }> =>
@@ -20,6 +20,8 @@ const api = {
     ipcRenderer.on(IPC.PET_ACTIVITY, handler)
     return () => ipcRenderer.off(IPC.PET_ACTIVITY, handler)
   },
+  petPackageGet: (): Promise<PetRenderPackage> =>
+    ipcRenderer.invoke(IPC.PET_PACKAGE_GET) as Promise<PetRenderPackage>,
   settingsGet: (): Promise<Settings> => ipcRenderer.invoke(IPC.SETTINGS_GET) as Promise<Settings>,
   settingsSet: (patch: Partial<Settings>): Promise<Settings> =>
     ipcRenderer.invoke(IPC.SETTINGS_SET, patch) as Promise<Settings>,

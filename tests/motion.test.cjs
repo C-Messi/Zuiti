@@ -2,19 +2,20 @@ const assert = require('node:assert/strict')
 const test = require('node:test')
 
 const {
-  DEFAULT_MOTION_BY_MOOD,
-  DEFAULT_SKELETON_ID,
+  buildMotionPromptText,
+  loadDefaultMotionByMood,
   normalizeMotionPlan
 } = require('../src/main/motion/validate')
-const { DEFAULT_CAT_SKELETON } = require('../src/renderer/src/pet/skeleton')
+const { loadPetPackage } = require('../src/main/pet/package')
 
 test('normalizeMotionPlan rejects unknown tools and clamps numeric params', () => {
+  const pkg = loadPetPackage(process.cwd())
   const plan = normalizeMotionPlan(
     {
       skeleton_id: 'default-cat',
       commands: [
         {
-          tool: 'wave',
+          tool: 'sing',
           durationMs: 99,
           params: {
             angleDeg: 999,
@@ -30,12 +31,13 @@ test('normalizeMotionPlan rejects unknown tools and clamps numeric params', () =
         }
       ]
     },
-    'happy'
+    'happy',
+    pkg
   )
 
   assert.equal(plan.skeleton_id, 'default-cat')
   assert.equal(plan.commands.length, 1)
-  assert.equal(plan.commands[0].tool, 'wave')
+  assert.equal(plan.commands[0].tool, 'sing')
   assert.equal(plan.commands[0].durationMs, 600)
   assert.equal(plan.commands[0].params.angleDeg, 24)
   assert.equal(plan.commands[0].params.offsetY, -20)
@@ -44,37 +46,61 @@ test('normalizeMotionPlan rejects unknown tools and clamps numeric params', () =
 })
 
 test('normalizeMotionPlan falls back for invalid skeleton or empty commands', () => {
+  const pkg = loadPetPackage(process.cwd())
   const plan = normalizeMotionPlan(
     {
       skeleton_id: 'totally-different-pet',
       commands: []
     },
-    'sad'
+    'sad',
+    pkg
   )
 
-  assert.deepEqual(plan, DEFAULT_MOTION_BY_MOOD.sad)
+  assert.deepEqual(plan, loadDefaultMotionByMood(pkg).sad)
 })
 
-test('default cat skeleton exposes required anchors and motion tools', () => {
-  assert.equal(DEFAULT_SKELETON_ID, 'default-cat')
-  assert.equal(DEFAULT_CAT_SKELETON.id, 'default-cat')
+test('default cat pet package exposes resource-owned anchors and motion tools', () => {
+  const pkg = loadPetPackage(process.cwd())
+  assert.equal(pkg.id, 'default-cat')
 
-  for (const part of ['body', 'head', 'left_arm', 'right_arm', 'left_foot', 'right_foot', 'tail', 'face']) {
-    assert.ok(DEFAULT_CAT_SKELETON.parts[part], `missing part ${part}`)
+  for (const part of [
+    'body',
+    'head',
+    'left_arm',
+    'right_arm',
+    'left_foot',
+    'right_foot',
+    'tail',
+    'face'
+  ]) {
+    assert.ok(pkg.parts[part], `missing part ${part}`)
   }
 
-  for (const anchor of ['left_hand', 'right_hand', 'head_top', 'mouth', 'beside_left', 'beside_right']) {
-    const point = DEFAULT_CAT_SKELETON.anchors[anchor]
+  for (const anchor of [
+    'left_hand',
+    'right_hand',
+    'head_top',
+    'mouth',
+    'beside_left',
+    'beside_right'
+  ]) {
+    const point = pkg.anchors[anchor]
     assert.equal(typeof point.x, 'number', `missing x for ${anchor}`)
     assert.equal(typeof point.y, 'number', `missing y for ${anchor}`)
   }
 
   for (const tool of ['idle_breathe', 'nod', 'shake_head', 'wave', 'hop', 'sing']) {
-    assert.ok(DEFAULT_CAT_SKELETON.motionTools.includes(tool), `missing tool ${tool}`)
+    assert.ok(
+      pkg.motionTools.some((item) => item.id === tool),
+      `missing tool ${tool}`
+    )
   }
+  assert.match(buildMotionPromptText(pkg), /tilt_head/)
+  assert.match(buildMotionPromptText(pkg), /prompt=/)
 })
 
 test('normalizeMotionPlan accepts semantic skeleton part motion tools', () => {
+  const pkg = loadPetPackage(process.cwd())
   const plan = normalizeMotionPlan(
     {
       skeleton_id: 'default-cat',
@@ -84,7 +110,8 @@ test('normalizeMotionPlan accepts semantic skeleton part motion tools', () => {
         { tool: 'swish_tail', durationMs: 1600, params: { angleDeg: 18, repeats: 3 } }
       ]
     },
-    'excited'
+    'excited',
+    pkg
   )
 
   assert.deepEqual(

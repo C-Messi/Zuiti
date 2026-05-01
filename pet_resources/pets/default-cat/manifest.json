@@ -1,0 +1,286 @@
+{
+  "id": "default-cat",
+  "title": "Default cow-cat resource pet",
+  "viewBox": "0 0 256 256",
+  "ariaLabel": "Zuiti cow-cat 奶牛猫",
+  "renderOrder": [
+    "body",
+    "tail",
+    "left_foot",
+    "right_foot",
+    "left_arm",
+    "right_arm",
+    "ears",
+    "head",
+    "face"
+  ],
+  "parts": {
+    "body": {
+      "label": "Body shadow",
+      "path": "skeleton/parts/body.svg",
+      "transformOrigin": "50% 80%"
+    },
+    "tail": {
+      "label": "Tail",
+      "path": "skeleton/parts/tail.svg",
+      "transformOrigin": "8% 20%"
+    },
+    "left_foot": {
+      "label": "Left foot",
+      "path": "skeleton/parts/left-foot.svg",
+      "transformOrigin": "50% 50%"
+    },
+    "right_foot": {
+      "label": "Right foot",
+      "path": "skeleton/parts/right-foot.svg",
+      "transformOrigin": "50% 50%"
+    },
+    "left_arm": {
+      "label": "Left arm",
+      "path": "skeleton/parts/left-arm.svg",
+      "transformOrigin": "82% 12%"
+    },
+    "right_arm": {
+      "label": "Right arm",
+      "path": "skeleton/parts/right-arm.svg",
+      "transformOrigin": "18% 12%"
+    },
+    "ears": {
+      "label": "Ears",
+      "path": "skeleton/parts/ears.svg",
+      "transformOrigin": "50% 72%"
+    },
+    "head": {
+      "label": "Head",
+      "path": "skeleton/parts/head.svg",
+      "transformOrigin": "50% 70%"
+    },
+    "face": {
+      "label": "Face",
+      "path": "skeleton/parts/face-idle.svg",
+      "transformOrigin": "50% 70%"
+    }
+  },
+  "expressions": {
+    "idle": { "partId": "face", "path": "skeleton/expressions/face-idle.svg" },
+    "happy": { "partId": "face", "path": "skeleton/expressions/face-happy.svg" },
+    "angry_for_user": { "partId": "face", "path": "skeleton/expressions/face-angry-for-user.svg" },
+    "cuddling": { "partId": "face", "path": "skeleton/expressions/face-cuddling.svg" },
+    "hungry": { "partId": "face", "path": "skeleton/expressions/face-hungry.svg" },
+    "sleeping": { "partId": "face", "path": "skeleton/expressions/face-sleeping.svg" },
+    "excited": { "partId": "face", "path": "skeleton/expressions/face-excited.svg" },
+    "sad": { "partId": "face", "path": "skeleton/expressions/face-sad.svg" }
+  },
+  "anchors": {
+    "left_hand": { "x": 58, "y": 154 },
+    "right_hand": { "x": 198, "y": 154 },
+    "head_top": { "x": 128, "y": 44 },
+    "mouth": { "x": 128, "y": 146 },
+    "beside_left": { "x": 42, "y": 130 },
+    "beside_right": { "x": 214, "y": 130 }
+  },
+  "motionTools": [
+    {
+      "id": "idle_breathe",
+      "prompt": "安静待机、陪伴、轻微呼吸感时使用。",
+      "durationMs": 1800,
+      "easing": "ease-in-out",
+      "params": {
+        "scale": { "default": 1.02, "min": 0.92, "max": 1.08 },
+        "intensity": { "default": 0.35, "min": 0, "max": 1 }
+      },
+      "targets": [
+        {
+          "partIds": ["__root"],
+          "keyframes": [
+            { "offset": 0, "transform": "scale(1)" },
+            { "offset": 0.5, "transform": "scale({{scale}})" },
+            { "offset": 1, "transform": "scale(1)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nod",
+      "prompt": "认同、回应、轻轻点头时使用。",
+      "durationMs": 1300,
+      "easing": "ease-in-out",
+      "params": {
+        "angleDeg": { "default": 9, "min": -24, "max": 24 },
+        "repeats": { "default": 2, "min": 1, "max": 4 }
+      },
+      "targets": [
+        {
+          "partIds": ["head", "face", "ears"],
+          "keyframes": [
+            { "offset": 0, "transform": "rotate(0deg)" },
+            { "offset": 0.5, "transform": "rotate({{angleDeg}}deg)" },
+            { "offset": 1, "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shake_head",
+      "prompt": "吐槽、替用户不服、摇头时使用。",
+      "durationMs": 1300,
+      "easing": "ease-in-out",
+      "params": {
+        "angleDeg": { "default": 12, "min": -24, "max": 24 },
+        "repeats": { "default": 2, "min": 1, "max": 4 }
+      },
+      "targets": [
+        {
+          "partIds": ["head", "face", "ears"],
+          "keyframes": [
+            { "offset": 0, "transform": "rotate(0deg)" },
+            { "offset": 0.25, "transform": "rotate(calc({{angleDeg}}deg * -1))" },
+            { "offset": 0.75, "transform": "rotate({{angleDeg}}deg)" },
+            { "offset": 1, "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wave",
+      "prompt": "打招呼、轻松回应、挥手时使用。",
+      "durationMs": 1400,
+      "easing": "ease-in-out",
+      "params": {
+        "angleDeg": { "default": 14, "min": -24, "max": 24 },
+        "repeats": { "default": 2, "min": 1, "max": 4 }
+      },
+      "targets": [
+        {
+          "partIds": ["right_arm"],
+          "keyframes": [
+            { "offset": 0, "transform": "rotate(0deg)" },
+            { "offset": 0.5, "transform": "rotate({{angleDeg}}deg)" },
+            { "offset": 1, "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hop",
+      "prompt": "开心、兴奋、庆祝时使用。",
+      "durationMs": 1100,
+      "easing": "ease-in-out",
+      "params": {
+        "offsetX": { "default": 0, "min": -24, "max": 24 },
+        "offsetY": { "default": -16, "min": -20, "max": 20 },
+        "scale": { "default": 1.02, "min": 0.92, "max": 1.08 },
+        "repeats": { "default": 2, "min": 1, "max": 4 }
+      },
+      "targets": [
+        {
+          "partIds": ["__root"],
+          "keyframes": [
+            { "offset": 0, "transform": "translate(0px, 0px) scale(1)" },
+            { "offset": 0.45, "transform": "translate({{offsetX}}px, {{offsetY}}px) scale({{scale}})" },
+            { "offset": 1, "transform": "translate(0px, 0px) scale(1)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sing",
+      "prompt": "唱歌、表演、带麦克风道具时使用。",
+      "durationMs": 1800,
+      "easing": "ease-in-out",
+      "params": {
+        "angleDeg": { "default": 8, "min": -24, "max": 24 },
+        "offsetY": { "default": -10, "min": -20, "max": 20 },
+        "scale": { "default": 1.02, "min": 0.92, "max": 1.08 },
+        "repeats": { "default": 2, "min": 1, "max": 4 }
+      },
+      "targets": [
+        {
+          "partIds": ["__root"],
+          "keyframes": [
+            { "offset": 0, "transform": "translate(0px, 0px) scale(1)" },
+            { "offset": 0.45, "transform": "translate(0px, {{offsetY}}px) scale({{scale}})" },
+            { "offset": 1, "transform": "translate(0px, 0px) scale(1)" }
+          ]
+        },
+        {
+          "partIds": ["right_arm"],
+          "keyframes": [
+            { "offset": 0, "transform": "rotate(0deg)" },
+            { "offset": 0.5, "transform": "rotate({{angleDeg}}deg)" },
+            { "offset": 1, "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tilt_head",
+      "prompt": "好奇、疑问、认真听用户说话时使用。",
+      "durationMs": 1200,
+      "easing": "ease-in-out",
+      "params": {
+        "angleDeg": { "default": 10, "min": -24, "max": 24 }
+      },
+      "targets": [
+        {
+          "partIds": ["head", "face", "ears"],
+          "keyframes": [
+            { "offset": 0, "transform": "rotate(0deg)" },
+            { "offset": 0.5, "transform": "rotate({{angleDeg}}deg)" },
+            { "offset": 1, "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "perk_ears",
+      "prompt": "听到关键词、惊喜、精神起来时使用。",
+      "durationMs": 900,
+      "easing": "ease-in-out",
+      "params": {
+        "angleDeg": { "default": -8, "min": -24, "max": 24 }
+      },
+      "targets": [
+        {
+          "partIds": ["ears"],
+          "keyframes": [
+            { "offset": 0, "transform": "translateY(0px) rotate(0deg)" },
+            { "offset": 0.5, "transform": "translateY(-4px) rotate({{angleDeg}}deg)" },
+            { "offset": 1, "transform": "translateY(0px) rotate(0deg)" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "swish_tail",
+      "prompt": "轻松、开心、撒娇或得意时使用。",
+      "durationMs": 1600,
+      "easing": "ease-in-out",
+      "params": {
+        "angleDeg": { "default": 18, "min": -24, "max": 24 },
+        "repeats": { "default": 3, "min": 1, "max": 4 }
+      },
+      "targets": [
+        {
+          "partIds": ["tail"],
+          "keyframes": [
+            { "offset": 0, "transform": "rotate(0deg)" },
+            { "offset": 0.25, "transform": "rotate(calc({{angleDeg}}deg * -1))" },
+            { "offset": 0.75, "transform": "rotate({{angleDeg}}deg)" },
+            { "offset": 1, "transform": "rotate(0deg)" }
+          ]
+        }
+      ]
+    }
+  ],
+  "moodDefaults": {
+    "idle": { "skeleton_id": "default-cat", "commands": [{ "tool": "idle_breathe", "durationMs": 1800, "params": { "scale": 1.01, "intensity": 0.35 } }] },
+    "happy": { "skeleton_id": "default-cat", "commands": [{ "tool": "nod", "durationMs": 1300, "params": { "angleDeg": 9, "repeats": 2 } }] },
+    "angry_for_user": { "skeleton_id": "default-cat", "commands": [{ "tool": "shake_head", "durationMs": 1300, "params": { "angleDeg": 12, "repeats": 2 } }] },
+    "cuddling": { "skeleton_id": "default-cat", "commands": [{ "tool": "idle_breathe", "durationMs": 2200, "params": { "scale": 1.03, "intensity": 0.55 } }] },
+    "hungry": { "skeleton_id": "default-cat", "commands": [{ "tool": "nod", "durationMs": 1200, "params": { "angleDeg": 7, "repeats": 1 } }] },
+    "sleeping": { "skeleton_id": "default-cat", "commands": [{ "tool": "idle_breathe", "durationMs": 2600, "params": { "scale": 1.01, "intensity": 0.2 } }] },
+    "excited": { "skeleton_id": "default-cat", "commands": [{ "tool": "hop", "durationMs": 1100, "params": { "offsetY": -16, "repeats": 2 } }] },
+    "sad": { "skeleton_id": "default-cat", "commands": [{ "tool": "nod", "durationMs": 1800, "params": { "angleDeg": 5, "repeats": 1 } }] }
+  }
+}

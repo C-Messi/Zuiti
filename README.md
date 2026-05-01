@@ -12,10 +12,10 @@ See [Project Overview](docs/overview.md) for more context.
 
 ## ✨ Key Features
 
-- **Consistent skeleton motion**: The LLM outputs a constrained motion plan, while React renders the same default cat skeleton with deterministic part transforms.
-- **Adaptive SVG prop skills**: The LLM can generate anchored SVG props such as microphones, flowers, and signs, then save them locally under `skills/` after deterministic safety validation and visual review.
+- **Complete pet packages**: The active pet loads its skeleton SVG parts, expressions, anchors, motion tools, motion prompts, memory, and prop skills from `pet_resources/pets/<pet_id>/`.
+- **Adaptive SVG prop skills**: The LLM can generate anchored SVG props such as microphones, flowers, and signs, then save them locally under the active pet package after deterministic safety validation and visual review.
 - **Stable context snapshots**: Text replies use the latest completed vision summary, memory, skill index, and short-term chat window without blocking on current screenshot or memory analysis jobs.
-- **Compact long-term memory**: `SOUL.md` stores the pet's persona, while `memory.md` keeps only high-value, low-token long-term preferences and context.
+- **Compact long-term memory**: each pet package owns its `SOUL.md`, while runtime `memory.md` keeps only high-value, low-token long-term preferences and context.
 - **Low-friction screen understanding**: Raw screenshots are not kept as long-term history; the dialogue context receives a sanitized semantic summary instead.
 - **Transparent desktop pet UI**: Electron + React render the default SVG cat, dynamic actions, speech bubbles, input, and lightweight settings.
 - **Local-first runtime state**: Runtime-generated memory and skills are ignored by git by default, keeping personal state local and experiments clean.
@@ -32,13 +32,14 @@ npm run dev
 
 Important `.env` variables:
 
-| Variable | Values | Description |
-| --- | --- | --- |
-| `LLM_PROVIDER` | `openai` / `anthropic` / `mock` | LLM provider; `mock` can run the base flow offline |
-| `LLM_BASE_URL` | Example: `https://api.openai.com/v1` | API base URL, including compatible providers |
-| `LLM_API_KEY` | `sk-...` | API key |
-| `LLM_TEXT_MODEL` | Example: `gpt-4o-mini` | Model for dialogue, memory, and skill authoring |
-| `LLM_VISION_MODEL` | Example: `gpt-4o-mini` | Model for screenshot summaries and skill review |
+| Variable           | Values                               | Description                                        |
+| ------------------ | ------------------------------------ | -------------------------------------------------- |
+| `ENABLED_PET`      | Example: `default-cat`               | Active package under `pet_resources/pets/`         |
+| `LLM_PROVIDER`     | `openai` / `anthropic` / `mock`      | LLM provider; `mock` can run the base flow offline |
+| `LLM_BASE_URL`     | Example: `https://api.openai.com/v1` | API base URL, including compatible providers       |
+| `LLM_API_KEY`      | `sk-...`                             | API key                                            |
+| `LLM_TEXT_MODEL`   | Example: `gpt-4o-mini`               | Model for dialogue, memory, and skill authoring    |
+| `LLM_VISION_MODEL` | Example: `gpt-4o-mini`               | Model for screenshot summaries and skill review    |
 
 Common commands:
 
@@ -66,17 +67,17 @@ See [Architecture](docs/architecture.md) for the full design.
 
 ## 📚 Modules
 
-| Module | Description | Docs |
-| --- | --- | --- |
-| Renderer | Default cat skeleton, deterministic motion, anchored props, speech bubbles, and settings panel | [docs/modules/renderer.md](docs/modules/renderer.md) |
-| Brain Agents | Prompt and output protocol for textAgent, visionAgent, and memoryAgent | [docs/modules/brain-agents.md](docs/modules/brain-agents.md) |
-| Skills | Anchored SVG prop skill package structure, generation, validation, review, and enablement | [docs/modules/skills.md](docs/modules/skills.md) |
-| Memory | `SOUL.md`, `memory.md`, short-term sliding window, and git policy | [docs/modules/memory.md](docs/modules/memory.md) |
-| Vision | Screenshot capture, privacy filtering, and sanitized screen summaries | [docs/modules/vision.md](docs/modules/vision.md) |
-| Behavior | Proactive triggers, window observation, and interaction pacing | [docs/modules/behavior.md](docs/modules/behavior.md) |
-| Development | Environment variables, commands, and commit notes | [docs/modules/development.md](docs/modules/development.md) |
+| Module       | Description                                                                                   | Docs                                                         |
+| ------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Renderer     | Pet package rendering, data-driven motion, anchored props, speech bubbles, and settings panel | [docs/modules/renderer.md](docs/modules/renderer.md)         |
+| Brain Agents | Prompt and output protocol for textAgent, visionAgent, and memoryAgent                        | [docs/modules/brain-agents.md](docs/modules/brain-agents.md) |
+| Skills       | Anchored SVG prop skill package structure, generation, validation, review, and enablement     | [docs/modules/skills.md](docs/modules/skills.md)             |
+| Memory       | `SOUL.md`, `memory.md`, short-term sliding window, and git policy                             | [docs/modules/memory.md](docs/modules/memory.md)             |
+| Vision       | Screenshot capture, privacy filtering, and sanitized screen summaries                         | [docs/modules/vision.md](docs/modules/vision.md)             |
+| Behavior     | Proactive triggers, window observation, and interaction pacing                                | [docs/modules/behavior.md](docs/modules/behavior.md)         |
+| Development  | Environment variables, commands, and commit notes                                             | [docs/modules/development.md](docs/modules/development.md)   |
 
-The repository keeps one example prop skill at [`skills/example-soft-wave/`](skills/example-soft-wave/) and one example long-term memory file at [`memory/memory.example.md`](memory/memory.example.md). Real runtime-generated `skills/<skill_id>/` packages and `memory/memory.md` are ignored by default.
+The repository keeps one example prop skill at [`pet_resources/pets/default-cat/skills/example-soft-wave/`](pet_resources/pets/default-cat/skills/example-soft-wave/) and one example long-term memory file at [`pet_resources/pets/default-cat/memory/memory.example.md`](pet_resources/pets/default-cat/memory/memory.example.md). Real runtime-generated pet-package skills and `memory.md` are ignored by default.
 
 ## 🚶 Roadmap
 
@@ -89,4 +90,4 @@ The repository keeps one example prop skill at [`skills/example-soft-wave/`](ski
 
 ## 📜 License
 
-Application code is released under the MIT License. Default visuals are repository SVG assets; generated action SVGs are stored locally under `skills/` by default.
+Application code is released under the MIT License. Default visuals are repository SVG assets; generated prop SVGs are stored locally under the active pet package by default.

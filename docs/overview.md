@@ -7,22 +7,21 @@ Zuiti 是一个运行在桌面上的 AI 电子宠物。它通过 Electron 提供
 ## 设计原则
 
 - **低干扰陪伴**：默认不抢用户注意力；屏幕上下文只在真正有帮助时使用。
-- **本地优先状态**：长期记忆和道具 skill 都落在本地目录，方便审查、清理和版本隔离。
-- **可解释动作系统**：动作以 SVG skill 包存在，包含 manifest、触发说明和可检查的矢量动画。
+- **本地优先状态**：长期记忆和道具 skill 都落在当前宠物包目录，方便审查、清理和版本隔离。
+- **可解释动作系统**：宠物包声明完整骨架、motion tools、触发 prompt 和可检查的矢量动画。
 - **稳定 prompt 结构**：文本回复基于最近完成的上下文快照，不等待正在运行的视觉或记忆任务。
 - **隐私优先**：屏幕原图不作为长期文件保存，进入 LLM 的内容应先转成去敏语义摘要。
 
 ## 主要目录
 
-| 路径 | 说明 |
-| --- | --- |
-| `src/main/` | Electron 主进程、agent 编排、memory、vision、skills、行为触发 |
-| `src/renderer/` | React 桌宠界面、气泡输入、配置面板、IPC wiring |
-| `src/shared/` | 主进程与渲染进程共享类型 |
-| `memory/` | 本地人格和长期记忆；仓库只保留 `SOUL.md` 与示例 |
-| `skills/` | 本地 SVG 道具 skill；仓库只保留一个示例 skill |
-| `docs/` | 模块文档与开发说明 |
-| `images/` | README 使用的海报和架构图 |
+| 路径                              | 说明                                                          |
+| --------------------------------- | ------------------------------------------------------------- |
+| `src/main/`                       | Electron 主进程、agent 编排、memory、vision、skills、行为触发 |
+| `src/renderer/`                   | React 桌宠界面、气泡输入、配置面板、IPC wiring                |
+| `src/shared/`                     | 主进程与渲染进程共享类型                                      |
+| `pet_resources/pets/default-cat/` | 默认宠物包：完整骨架、motion tools、memory、道具 skills       |
+| `docs/`                           | 模块文档与开发说明                                            |
+| `images/`                         | README 使用的海报和架构图                                     |
 
 ## 非目标
 

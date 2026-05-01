@@ -39,8 +39,17 @@ test('resolveActivityForReply creates singing motion with anchored microphone pr
   assert.equal(activity.prop.skill_id, 'mock-microphone')
   assert.equal(activity.prop.anchor, 'right_hand')
   assert.match(activity.prop.svg, /<svg/)
-  assert.ok(fs.existsSync(path.join(root, 'skills', 'mock-microphone', 'manifest.json')))
-  assert.ok(fs.existsSync(path.join(root, 'skills', 'mock-microphone', 'skill.md')))
-  assert.ok(fs.existsSync(path.join(root, 'skills', 'mock-microphone', 'prop.svg')))
-  assert.equal(fs.existsSync(path.join(root, 'skills', 'mock-microphone', 'action.svg')), false)
+  const skillRoot = path.join(
+    root,
+    'pet_resources',
+    'pets',
+    'default-cat',
+    'skills',
+    'mock-microphone'
+  )
+  assert.ok(fs.existsSync(path.join(skillRoot, 'manifest.json')))
+  assert.ok(fs.existsSync(path.join(skillRoot, 'skill.md')))
+  assert.ok(fs.existsSync(path.join(skillRoot, 'prop.svg')))
+  assert.equal(fs.existsSync(path.join(skillRoot, 'action.svg')), false)
+  assert.equal(fs.existsSync(path.join(root, 'skills', 'mock-microphone', 'manifest.json')), false)
 })

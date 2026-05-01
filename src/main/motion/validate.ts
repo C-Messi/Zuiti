@@ -1,72 +1,19 @@
 import type {
   MoodState,
-  MotionToolId,
+  MotionParamDefinition,
+  MotionToolDefinition,
   PetMotionCommand,
   PetMotionPlan,
-  SkeletonId
+  PetRenderPackage
 } from '../../shared/types'
-
-export const DEFAULT_SKELETON_ID: SkeletonId = 'default-cat'
-
-export const MOTION_TOOLS: MotionToolId[] = [
-  'idle_breathe',
-  'nod',
-  'shake_head',
-  'wave',
-  'hop',
-  'sing',
-  'tilt_head',
-  'perk_ears',
-  'swish_tail'
-]
+import {
+  loadPetPackage,
+  buildMotionPromptText as buildPackageMotionPromptText
+} from '../pet/package'
 
 const MIN_DURATION_MS = 600
 const MAX_DURATION_MS = 6000
 const MAX_COMMANDS = 3
-
-const PARAM_LIMITS: Record<string, { min: number; max: number }> = {
-  angleDeg: { min: -24, max: 24 },
-  offsetX: { min: -24, max: 24 },
-  offsetY: { min: -20, max: 20 },
-  scale: { min: 0.92, max: 1.08 },
-  repeats: { min: 1, max: 4 },
-  intensity: { min: 0, max: 1 }
-}
-
-export const DEFAULT_MOTION_BY_MOOD: Record<MoodState, PetMotionPlan> = {
-  idle: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'idle_breathe', durationMs: 1800, params: { intensity: 0.35 } }]
-  },
-  happy: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'nod', durationMs: 1300, params: { angleDeg: 9, repeats: 2 } }]
-  },
-  angry_for_user: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'shake_head', durationMs: 1300, params: { angleDeg: 12, repeats: 2 } }]
-  },
-  cuddling: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'idle_breathe', durationMs: 2200, params: { intensity: 0.55 } }]
-  },
-  hungry: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'nod', durationMs: 1200, params: { angleDeg: 7, repeats: 1 } }]
-  },
-  sleeping: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'idle_breathe', durationMs: 2600, params: { intensity: 0.2 } }]
-  },
-  excited: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'hop', durationMs: 1100, params: { offsetY: -16, repeats: 2 } }]
-  },
-  sad: {
-    skeleton_id: DEFAULT_SKELETON_ID,
-    commands: [{ tool: 'nod', durationMs: 1800, params: { angleDeg: 5, repeats: 1 } }]
-  }
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value))
@@ -76,50 +23,81 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-function normalizeParams(value: unknown): Record<string, number | string> | undefined {
-  if (!isRecord(value)) return undefined
+function toolById(pkg: PetRenderPackage, id: string): MotionToolDefinition | undefined {
+  return pkg.motionTools.find((tool) => tool.id === id)
+}
+
+function normalizeNumericParam(raw: unknown, limit: MotionParamDefinition): number {
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return clamp(raw, limit.min, limit.max)
+  }
+  return limit.default
+}
+
+function normalizeParams(
+  value: unknown,
+  tool: MotionToolDefinition
+): Record<string, number | string> | undefined {
+  const rawParams = isRecord(value) ? value : {}
   const params: Record<string, number | string> = {}
 
-  for (const [key, raw] of Object.entries(value)) {
-    if (typeof raw === 'number' && Number.isFinite(raw)) {
-      const limit = PARAM_LIMITS[key]
-      params[key] = limit ? clamp(raw, limit.min, limit.max) : raw
-    } else if (typeof raw === 'string' && raw.trim()) {
-      params[key] = raw.trim().slice(0, 40)
-    }
+  for (const [key, limit] of Object.entries(tool.params ?? {})) {
+    params[key] = normalizeNumericParam(rawParams[key], limit)
+  }
+
+  for (const [key, raw] of Object.entries(rawParams)) {
+    if (key in (tool.params ?? {})) continue
+    if (typeof raw === 'string' && raw.trim()) params[key] = raw.trim().slice(0, 40)
   }
 
   return Object.keys(params).length > 0 ? params : undefined
 }
 
-function normalizeCommand(raw: unknown): PetMotionCommand | null {
+function normalizeCommand(raw: unknown, pkg: PetRenderPackage): PetMotionCommand | null {
   if (!isRecord(raw)) return null
-  const tool = raw.tool
-  if (typeof tool !== 'string' || !MOTION_TOOLS.includes(tool as MotionToolId)) return null
+  const toolId = raw.tool
+  if (typeof toolId !== 'string') return null
+  const tool = toolById(pkg, toolId)
+  if (!tool) return null
 
-  const command: PetMotionCommand = { tool: tool as MotionToolId }
+  const command: PetMotionCommand = { tool: tool.id }
   if (typeof raw.durationMs === 'number' && Number.isFinite(raw.durationMs)) {
     command.durationMs = clamp(Math.round(raw.durationMs), MIN_DURATION_MS, MAX_DURATION_MS)
+  } else {
+    command.durationMs = tool.durationMs
   }
-  const params = normalizeParams(raw.params)
+  const params = normalizeParams(raw.params, tool)
   if (params) command.params = params
   return command
 }
 
-export function normalizeMotionPlan(rawPlan: unknown, mood: MoodState): PetMotionPlan {
-  if (!isRecord(rawPlan) || rawPlan.skeleton_id !== DEFAULT_SKELETON_ID) {
-    return DEFAULT_MOTION_BY_MOOD[mood]
+export function loadDefaultMotionByMood(pkg = loadPetPackage()): Record<MoodState, PetMotionPlan> {
+  return pkg.moodDefaults
+}
+
+export function buildMotionPromptText(pkg = loadPetPackage()): string {
+  return buildPackageMotionPromptText(pkg)
+}
+
+export function normalizeMotionPlan(
+  rawPlan: unknown,
+  mood: MoodState,
+  pkg = loadPetPackage()
+): PetMotionPlan {
+  const fallback = pkg.moodDefaults[mood]
+  if (!isRecord(rawPlan) || rawPlan.skeleton_id !== pkg.id) {
+    return fallback
   }
-  if (!Array.isArray(rawPlan.commands)) return DEFAULT_MOTION_BY_MOOD[mood]
+  if (!Array.isArray(rawPlan.commands)) return fallback
 
   const commands = rawPlan.commands
-    .map((command) => normalizeCommand(command))
+    .map((command) => normalizeCommand(command, pkg))
     .filter((command): command is PetMotionCommand => Boolean(command))
     .slice(0, MAX_COMMANDS)
 
-  if (commands.length === 0) return DEFAULT_MOTION_BY_MOOD[mood]
+  if (commands.length === 0) return fallback
   return {
-    skeleton_id: DEFAULT_SKELETON_ID,
+    skeleton_id: pkg.id,
     commands
   }
 }

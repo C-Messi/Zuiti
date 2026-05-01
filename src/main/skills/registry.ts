@@ -7,6 +7,7 @@ import type {
   SkillIndexItem,
   SkillManifest
 } from '../../shared/types'
+import { loadPetPackage, petSkillsDir } from '../pet/package'
 
 export const SKILLS_DIR_NAME = 'skills'
 
@@ -58,25 +59,17 @@ type SkillSelection =
   | { kind: 'create'; propIntent: string }
   | { kind: 'none' }
 
-const VALID_ANCHORS: PetAnchorId[] = [
-  'left_hand',
-  'right_hand',
-  'head_top',
-  'mouth',
-  'beside_left',
-  'beside_right'
-]
-
 function skillsDir(root = process.cwd()): string {
-  return join(root, SKILLS_DIR_NAME)
+  return petSkillsDir(root)
 }
 
 function normalizeTrigger(text: string): string {
   return text.trim().toLowerCase()
 }
 
-export function isValidPropAnchor(value: unknown): value is PetAnchorId {
-  return typeof value === 'string' && VALID_ANCHORS.includes(value as PetAnchorId)
+export function isValidPropAnchor(value: unknown, root = process.cwd()): value is PetAnchorId {
+  if (typeof value !== 'string') return false
+  return Object.prototype.hasOwnProperty.call(loadPetPackage(root).anchors, value)
 }
 
 export function validatePropSvg(svg: string): SvgValidationResult {
@@ -164,7 +157,7 @@ export function loadSkillIndex(root = process.cwd()): SkillIndexItem[] {
         if (
           manifest.kind !== 'prop' ||
           !manifest.enabled ||
-          !isValidPropAnchor(manifest.anchor) ||
+          !isValidPropAnchor(manifest.anchor, root) ||
           !existsSync(join(skillsDir(root), entry.name, 'prop.svg'))
         ) {
           return []
@@ -194,7 +187,7 @@ export function readSkillProp(skillId: string, root = process.cwd()): PetProp | 
   const svgPath = join(skillsDir(root), skillId, 'prop.svg')
   if (!existsSync(manifestPath) || !existsSync(svgPath)) return null
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as SkillManifest
-  if (manifest.kind !== 'prop' || !manifest.enabled || !isValidPropAnchor(manifest.anchor)) {
+  if (manifest.kind !== 'prop' || !manifest.enabled || !isValidPropAnchor(manifest.anchor, root)) {
     return null
   }
   return {
@@ -214,7 +207,7 @@ export function writeSkillPackage(
 ): void {
   const validation = validatePropSvg(svg)
   if (!validation.ok) throw new Error(validation.reason)
-  if (manifest.kind !== 'prop' || !isValidPropAnchor(manifest.anchor)) {
+  if (manifest.kind !== 'prop' || !isValidPropAnchor(manifest.anchor, root)) {
     throw new Error('prop skill manifest must include a valid anchor')
   }
   ensureSkillsDir(root)

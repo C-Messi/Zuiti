@@ -100,8 +100,9 @@ test('buildSkillIndexText is compact and excludes disabled skills', () => {
 
 test('loadSkillIndex ignores legacy action.svg packages and loads prop packages', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'zuiti-prop-registry-'))
-  const legacyDir = path.join(root, 'skills', 'legacy-wave')
-  const propDir = path.join(root, 'skills', 'microphone')
+  const skillsRoot = path.join(root, 'pet_resources', 'pets', 'default-cat', 'skills')
+  const legacyDir = path.join(skillsRoot, 'legacy-wave')
+  const propDir = path.join(skillsRoot, 'microphone')
   fs.mkdirSync(legacyDir, { recursive: true })
   fs.mkdirSync(propDir, { recursive: true })
 
@@ -148,4 +149,6 @@ test('loadSkillIndex ignores legacy action.svg packages and loads prop packages'
   assert.ok(prop)
   assert.equal(prop.anchor, 'right_hand')
   assert.match(prop.svg, /<svg/)
+  assert.ok(fs.existsSync(path.join(skillsRoot, 'microphone', 'manifest.json')))
+  assert.equal(fs.existsSync(path.join(root, 'skills', 'microphone', 'manifest.json')), false)
 })
