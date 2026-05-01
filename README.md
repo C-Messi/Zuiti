@@ -6,13 +6,14 @@
 
 🐱 **Zuiti** is an AI desktop pet that lives beside the user's screen in a transparent floating window. It can understand the broad context of the current screen, maintain a compact long-term memory, and respond at the right moment with short natural dialogue and dynamic actions.
 
-The project is not trying to wrap a conventional productivity assistant in a cute shell. It explores a more present, more emotionally aware desktop AI companion: one that cares without interrupting too much, uses screen context without feeling like surveillance, and gradually grows its own SVG action skills instead of being limited to fixed assets.
+The project is not trying to wrap a conventional productivity assistant in a cute shell. It explores a more present, more emotionally aware desktop AI companion: one that cares without interrupting too much, uses screen context without feeling like surveillance, keeps a consistent pet body through a deterministic SVG skeleton, and gradually grows reusable SVG prop skills instead of redrawing the pet each time.
 
 See [Project Overview](docs/overview.md) for more context.
 
 ## ✨ Key Features
 
-- **Adaptive SVG action skills**: The LLM can generate SVG actions from an action intent, then save them locally under `skills/` after deterministic safety validation and visual review.
+- **Consistent skeleton motion**: The LLM outputs a constrained motion plan, while React renders the same default cat skeleton with deterministic part transforms.
+- **Adaptive SVG prop skills**: The LLM can generate anchored SVG props such as microphones, flowers, and signs, then save them locally under `skills/` after deterministic safety validation and visual review.
 - **Stable context snapshots**: Text replies use the latest completed vision summary, memory, skill index, and short-term chat window without blocking on current screenshot or memory analysis jobs.
 - **Compact long-term memory**: `SOUL.md` stores the pet's persona, while `memory.md` keeps only high-value, low-token long-term preferences and context.
 - **Low-friction screen understanding**: Raw screenshots are not kept as long-term history; the dialogue context receives a sanitized semantic summary instead.
@@ -67,15 +68,15 @@ See [Architecture](docs/architecture.md) for the full design.
 
 | Module | Description | Docs |
 | --- | --- | --- |
-| Renderer | Default cat, dynamic SVG actions, speech bubbles, and settings panel | [docs/modules/renderer.md](docs/modules/renderer.md) |
+| Renderer | Default cat skeleton, deterministic motion, anchored props, speech bubbles, and settings panel | [docs/modules/renderer.md](docs/modules/renderer.md) |
 | Brain Agents | Prompt and output protocol for textAgent, visionAgent, and memoryAgent | [docs/modules/brain-agents.md](docs/modules/brain-agents.md) |
-| Skills | SVG skill package structure, generation, validation, review, and enablement | [docs/modules/skills.md](docs/modules/skills.md) |
+| Skills | Anchored SVG prop skill package structure, generation, validation, review, and enablement | [docs/modules/skills.md](docs/modules/skills.md) |
 | Memory | `SOUL.md`, `memory.md`, short-term sliding window, and git policy | [docs/modules/memory.md](docs/modules/memory.md) |
 | Vision | Screenshot capture, privacy filtering, and sanitized screen summaries | [docs/modules/vision.md](docs/modules/vision.md) |
 | Behavior | Proactive triggers, window observation, and interaction pacing | [docs/modules/behavior.md](docs/modules/behavior.md) |
 | Development | Environment variables, commands, and commit notes | [docs/modules/development.md](docs/modules/development.md) |
 
-The repository keeps one example skill at [`skills/example-soft-wave/`](skills/example-soft-wave/) and one example long-term memory file at [`memory/memory.example.md`](memory/memory.example.md). Real runtime-generated `skills/<skill_id>/` packages and `memory/memory.md` are ignored by default.
+The repository keeps one example prop skill at [`skills/example-soft-wave/`](skills/example-soft-wave/) and one example long-term memory file at [`memory/memory.example.md`](memory/memory.example.md). Real runtime-generated `skills/<skill_id>/` packages and `memory/memory.md` are ignored by default.
 
 ## 🚶 Roadmap
 

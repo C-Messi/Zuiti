@@ -1,6 +1,6 @@
 import type { LLMProvider } from '../brain/provider'
 import type { SkillDraft } from './author'
-import { validateActionSvg } from './registry'
+import { validatePropSvg } from './registry'
 import { safeWarn } from '../logger'
 
 export type SkillReviewResult = {
@@ -8,13 +8,13 @@ export type SkillReviewResult = {
   summary: string
 }
 
-const REVIEW_SYSTEM = `你是嘴替桌宠的动作视觉审核器。
+const REVIEW_SYSTEM = `你是嘴替桌宠的道具视觉审核器。
 
-请根据预览图判断这个动作是否适合自动启用：
+请根据预览图判断这个道具是否适合自动启用：
 - 视觉是否清晰可读
-- 是否像可爱桌宠动作
+- 是否是单个可挂载道具，而不是完整宠物、身体、脸、背景或大场景
 - 是否安全、无敏感或攻击内容
-- 是否匹配动作意图
+- 是否匹配道具意图与锚点，且不会明显遮挡宠物本体
 
 只输出 JSON：{ "score": 0-100, "summary": "一句话" }`
 
@@ -54,9 +54,9 @@ async function renderSvgPreviewBase64(svg: string): Promise<string | null> {
 export async function reviewSkillDraft(
   provider: LLMProvider,
   draft: SkillDraft,
-  actionIntent: string
+  propIntent: string
 ): Promise<SkillReviewResult> {
-  const validation = validateActionSvg(draft.svg)
+  const validation = validatePropSvg(draft.svg)
   if (!validation.ok) return { score: 0, summary: validation.reason }
 
   const preview = await renderSvgPreviewBase64(validation.svg)
@@ -67,7 +67,7 @@ export async function reviewSkillDraft(
   try {
     const raw = await provider.visionJSON(
       REVIEW_SYSTEM,
-      `动作意图：${actionIntent}\n标题：${draft.title}\n描述：${draft.description}`,
+      `道具意图：${propIntent}\n锚点：${draft.anchor}\n标题：${draft.title}\n描述：${draft.description}`,
       preview
     )
     return parseScore(raw) ?? { score: 0, summary: '视觉审核返回格式无效' }

@@ -4,14 +4,21 @@ const test = require('node:test')
 const {
   buildSkillIndexText,
   selectSkill,
-  validateActionSvg
+  validatePropSvg,
+  writeSkillPackage,
+  loadSkillIndex,
+  readSkillProp
 } = require('../src/main/skills/registry')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
 
-test('validateActionSvg accepts compact standalone animated svg', () => {
-  const result = validateActionSvg(`
+test('validatePropSvg accepts compact standalone prop svg', () => {
+  const result = validatePropSvg(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
       <g>
-        <circle cx="128" cy="128" r="58" fill="#fff7ed" stroke="#111827" />
+        <rect x="105" y="72" width="46" height="118" rx="18" fill="#111827" />
+        <circle cx="128" cy="60" r="28" fill="#f472b6" stroke="#111827" />
         <animateTransform attributeName="transform" type="translate" values="0 0;0 -8;0 0" dur="1.2s" repeatCount="indefinite" />
       </g>
     </svg>
@@ -20,7 +27,7 @@ test('validateActionSvg accepts compact standalone animated svg', () => {
   assert.equal(result.ok, true)
 })
 
-test('validateActionSvg rejects unsafe svg features', () => {
+test('validatePropSvg rejects unsafe svg features', () => {
   const bad = [
     '<svg viewBox="0 0 10 10"><script>alert(1)</script></svg>',
     '<svg viewBox="0 0 10 10"><image href="https://example.com/a.png" /></svg>',
@@ -29,13 +36,14 @@ test('validateActionSvg rejects unsafe svg features', () => {
   ]
 
   for (const svg of bad) {
-    assert.equal(validateActionSvg(svg).ok, false)
+    assert.equal(validatePropSvg(svg).ok, false)
   }
 })
 
-test('selectSkill chooses enabled trigger match before creating a new skill', () => {
+test('selectSkill chooses enabled prop trigger match before creating a new skill', () => {
   const index = [
     {
+      kind: 'prop',
       id: 'comfort-hug',
       title: 'Comfort Hug',
       triggers: ['抱抱', '安慰', 'hug'],
@@ -43,12 +51,13 @@ test('selectSkill chooses enabled trigger match before creating a new skill', ()
       durationMs: 2600,
       reviewScore: 91,
       enabled: true,
+      anchor: 'right_hand',
       description: 'leans forward with warm hug motion'
     }
   ]
 
   const selected = selectSkill(index, {
-    actionIntent: '想抱抱用户一下',
+    propIntent: '想抱抱用户一下',
     mood: 'cuddling'
   })
 
@@ -58,6 +67,7 @@ test('selectSkill chooses enabled trigger match before creating a new skill', ()
 test('buildSkillIndexText is compact and excludes disabled skills', () => {
   const text = buildSkillIndexText([
     {
+      kind: 'prop',
       id: 'spark-jump',
       title: 'Spark Jump',
       triggers: ['开心', '庆祝'],
@@ -65,9 +75,11 @@ test('buildSkillIndexText is compact and excludes disabled skills', () => {
       durationMs: 1800,
       reviewScore: 88,
       enabled: true,
+      anchor: 'head_top',
       description: 'small celebratory jump'
     },
     {
+      kind: 'prop',
       id: 'draft',
       title: 'Draft',
       triggers: ['x'],
@@ -75,11 +87,65 @@ test('buildSkillIndexText is compact and excludes disabled skills', () => {
       durationMs: 1000,
       reviewScore: 30,
       enabled: false,
+      anchor: 'beside_left',
       description: 'not ready'
     }
   ])
 
   assert.match(text, /spark-jump/)
+  assert.match(text, /anchor=head_top/)
   assert.doesNotMatch(text, /draft/)
   assert.ok(text.length < 220)
+})
+
+test('loadSkillIndex ignores legacy action.svg packages and loads prop packages', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'zuiti-prop-registry-'))
+  const legacyDir = path.join(root, 'skills', 'legacy-wave')
+  const propDir = path.join(root, 'skills', 'microphone')
+  fs.mkdirSync(legacyDir, { recursive: true })
+  fs.mkdirSync(propDir, { recursive: true })
+
+  fs.writeFileSync(
+    path.join(legacyDir, 'manifest.json'),
+    JSON.stringify({
+      id: 'legacy-wave',
+      title: 'Legacy Wave',
+      triggers: ['挥手'],
+      moodAffinity: ['happy'],
+      durationMs: 1000,
+      reviewScore: 90,
+      enabled: true,
+      description: 'old full pet action'
+    })
+  )
+  fs.writeFileSync(path.join(legacyDir, 'action.svg'), '<svg viewBox="0 0 10 10"></svg>')
+
+  writeSkillPackage(
+    {
+      kind: 'prop',
+      id: 'microphone',
+      title: 'Microphone',
+      triggers: ['唱歌'],
+      moodAffinity: ['excited'],
+      durationMs: 1800,
+      reviewScore: 92,
+      enabled: true,
+      anchor: 'right_hand',
+      description: 'handheld singing microphone',
+      createdAt: '2026-05-01T00:00:00.000Z'
+    },
+    '- 触发：唱歌\n- 道具：麦克风',
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect x="108" y="78" width="40" height="120" rx="18" fill="#111827"/></svg>',
+    root
+  )
+
+  const index = loadSkillIndex(root)
+  assert.equal(index.length, 1)
+  assert.equal(index[0].id, 'microphone')
+  assert.equal(index[0].anchor, 'right_hand')
+
+  const prop = readSkillProp('microphone', root)
+  assert.ok(prop)
+  assert.equal(prop.anchor, 'right_hand')
+  assert.match(prop.svg, /<svg/)
 })

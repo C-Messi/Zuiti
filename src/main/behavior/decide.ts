@@ -6,7 +6,7 @@ import { queueMemoryRefresh } from '../memory/analyze'
 import { tokenStateText } from '../token/economy'
 import { getActiveApp } from './triggers'
 import { getContextManager } from '../context/snapshot'
-import { resolveActionForReply } from '../skills/orchestrator'
+import { resolveActivityForReply } from '../skills/orchestrator'
 import type { TriggerReason } from './triggers'
 import { IPC, type MoodState, type ScreenObservation } from '../../shared/types'
 
@@ -55,7 +55,7 @@ export async function actSpontaneous(win: BrowserWindow, reason: TriggerReason):
     win.webContents.send(IPC.PET_SPEAK, reply.dialogue)
   }
   queueMemoryRefresh()
-  void resolveActionForReply(reply, getProvider()).then((action) => {
-    if (action && !win.isDestroyed()) win.webContents.send(IPC.PET_ACTION, action)
+  void resolveActivityForReply(reply, getProvider()).then((activity) => {
+    if (!win.isDestroyed()) win.webContents.send(IPC.PET_ACTIVITY, activity)
   })
 }

@@ -5,7 +5,8 @@ const test = require('node:test')
 
 const {
   buildDefaultCatSvg,
-  buildDefaultCatSvgDataUrl
+  buildDefaultCatSvgDataUrl,
+  buildDefaultCatSvgMarkup
 } = require('../src/renderer/src/pet/defaultCatSvg')
 
 test('buildDefaultCatSvg draws a standalone safe cat svg for every mood', () => {
@@ -37,7 +38,24 @@ test('buildDefaultCatSvgDataUrl returns inline svg data url', () => {
   assert.match(decodeURIComponent(url), /<svg /)
 })
 
-test('PetView no longer references resources pet png frame paths', () => {
+test('buildDefaultCatSvgMarkup exposes stable transformable part groups', () => {
+  const markup = buildDefaultCatSvgMarkup('excited')
+
+  for (const id of [
+    'zuiti-part-body',
+    'zuiti-part-head',
+    'zuiti-part-left-arm',
+    'zuiti-part-right-arm',
+    'zuiti-part-left-foot',
+    'zuiti-part-right-foot',
+    'zuiti-part-tail',
+    'zuiti-part-face'
+  ]) {
+    assert.match(markup, new RegExp(`id="${id}"`))
+  }
+})
+
+test('PetView no longer replaces pet with full action svgs', () => {
   const source = fs.readFileSync(
     path.join(process.cwd(), 'src/renderer/src/components/PetView.tsx'),
     'utf8'
@@ -45,4 +63,8 @@ test('PetView no longer references resources pet png frame paths', () => {
 
   assert.doesNotMatch(source, /pet\/\$\{/)
   assert.doesNotMatch(source, /FRAMES/)
+  assert.doesNotMatch(source, /activeSkillAction/)
+  assert.doesNotMatch(source, /data:image\/svg\+xml;charset=utf-8,\$\{encodeURIComponent\(active/)
+  assert.match(source, /activeActivity/)
+  assert.match(source, /buildDefaultCatSvgMarkup/)
 })

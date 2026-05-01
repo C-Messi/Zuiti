@@ -1,6 +1,12 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import type { MoodState, PetAction, SkillIndexItem, SkillManifest } from '../../shared/types'
+import type {
+  MoodState,
+  PetAnchorId,
+  PetProp,
+  SkillIndexItem,
+  SkillManifest
+} from '../../shared/types'
 
 export const SKILLS_DIR_NAME = 'skills'
 
@@ -42,15 +48,24 @@ const ALLOWED_TAGS = new Set([
 type SvgValidationResult = { ok: true; svg: string } | { ok: false; reason: string }
 
 type SkillSelectionInput = {
-  actionIntent?: string
+  propIntent?: string
   requestedSkillId?: string
   mood: MoodState
 }
 
 type SkillSelection =
   | { kind: 'existing'; skillId: string }
-  | { kind: 'create'; actionIntent: string }
+  | { kind: 'create'; propIntent: string }
   | { kind: 'none' }
+
+const VALID_ANCHORS: PetAnchorId[] = [
+  'left_hand',
+  'right_hand',
+  'head_top',
+  'mouth',
+  'beside_left',
+  'beside_right'
+]
 
 function skillsDir(root = process.cwd()): string {
   return join(root, SKILLS_DIR_NAME)
@@ -60,7 +75,11 @@ function normalizeTrigger(text: string): string {
   return text.trim().toLowerCase()
 }
 
-export function validateActionSvg(svg: string): SvgValidationResult {
+export function isValidPropAnchor(value: unknown): value is PetAnchorId {
+  return typeof value === 'string' && VALID_ANCHORS.includes(value as PetAnchorId)
+}
+
+export function validatePropSvg(svg: string): SvgValidationResult {
   const trimmed = svg.trim()
   if (!trimmed.startsWith('<svg')) return { ok: false, reason: 'svg must start with <svg' }
   if (trimmed.length > MAX_SVG_CHARS) return { ok: false, reason: 'svg is too large' }
@@ -95,11 +114,11 @@ export function sanitizeSkillId(input: string): string {
 
 export function buildSkillIndexText(skills: SkillIndexItem[]): string {
   const enabled = skills.filter((skill) => skill.enabled)
-  if (enabled.length === 0) return '（暂无已启用动作 skill）'
+  if (enabled.length === 0) return '（暂无已启用道具 skill）'
   return enabled
     .map(
       (skill) =>
-        `${skill.id}: ${skill.triggers.slice(0, 4).join('/')} | mood=${skill.moodAffinity.join(',')} | ${skill.description}`
+        `${skill.id}: ${skill.triggers.slice(0, 4).join('/')} | anchor=${skill.anchor} | mood=${skill.moodAffinity.join(',')} | ${skill.description}`
     )
     .join('\n')
     .slice(0, 1000)
@@ -112,7 +131,7 @@ export function selectSkill(index: SkillIndexItem[], input: SkillSelectionInput)
     if (exact) return { kind: 'existing', skillId: exact.id }
   }
 
-  const intent = normalizeTrigger(input.actionIntent ?? '')
+  const intent = normalizeTrigger(input.propIntent ?? '')
   if (!intent) return { kind: 'none' }
 
   const scored = enabled
@@ -130,7 +149,7 @@ export function selectSkill(index: SkillIndexItem[], input: SkillSelectionInput)
     .sort((a, b) => b.score - a.score)
 
   if (scored[0]) return { kind: 'existing', skillId: scored[0].skill.id }
-  return { kind: 'create', actionIntent: input.actionIntent ?? input.mood }
+  return { kind: 'create', propIntent: input.propIntent ?? input.mood }
 }
 
 export function loadSkillIndex(root = process.cwd()): SkillIndexItem[] {
@@ -142,8 +161,17 @@ export function loadSkillIndex(root = process.cwd()): SkillIndexItem[] {
         const manifest = JSON.parse(
           readFileSync(join(skillsDir(root), entry.name, 'manifest.json'), 'utf8')
         ) as SkillManifest
+        if (
+          manifest.kind !== 'prop' ||
+          !manifest.enabled ||
+          !isValidPropAnchor(manifest.anchor) ||
+          !existsSync(join(skillsDir(root), entry.name, 'prop.svg'))
+        ) {
+          return []
+        }
         return [
           {
+            kind: 'prop',
             id: manifest.id,
             title: manifest.title,
             triggers: manifest.triggers,
@@ -151,6 +179,7 @@ export function loadSkillIndex(root = process.cwd()): SkillIndexItem[] {
             durationMs: manifest.durationMs,
             reviewScore: manifest.reviewScore,
             enabled: manifest.enabled,
+            anchor: manifest.anchor,
             description: manifest.description
           }
         ]
@@ -160,16 +189,19 @@ export function loadSkillIndex(root = process.cwd()): SkillIndexItem[] {
     })
 }
 
-export function readSkillAction(skillId: string, root = process.cwd()): PetAction | null {
+export function readSkillProp(skillId: string, root = process.cwd()): PetProp | null {
   const manifestPath = join(skillsDir(root), skillId, 'manifest.json')
-  const svgPath = join(skillsDir(root), skillId, 'action.svg')
+  const svgPath = join(skillsDir(root), skillId, 'prop.svg')
   if (!existsSync(manifestPath) || !existsSync(svgPath)) return null
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as SkillManifest
-  if (!manifest.enabled) return null
+  if (manifest.kind !== 'prop' || !manifest.enabled || !isValidPropAnchor(manifest.anchor)) {
+    return null
+  }
   return {
     skill_id: manifest.id,
     title: manifest.title,
     durationMs: manifest.durationMs,
+    anchor: manifest.anchor,
     svg: readFileSync(svgPath, 'utf8')
   }
 }
@@ -180,12 +212,15 @@ export function writeSkillPackage(
   svg: string,
   root = process.cwd()
 ): void {
-  const validation = validateActionSvg(svg)
+  const validation = validatePropSvg(svg)
   if (!validation.ok) throw new Error(validation.reason)
+  if (manifest.kind !== 'prop' || !isValidPropAnchor(manifest.anchor)) {
+    throw new Error('prop skill manifest must include a valid anchor')
+  }
   ensureSkillsDir(root)
   const dir = join(skillsDir(root), manifest.id)
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
   writeFileSync(join(dir, 'skill.md'), skillMarkdown.trim() + '\n', 'utf8')
-  writeFileSync(join(dir, 'action.svg'), validation.svg + '\n', 'utf8')
+  writeFileSync(join(dir, 'prop.svg'), validation.svg + '\n', 'utf8')
 }

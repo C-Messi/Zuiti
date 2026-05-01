@@ -108,7 +108,7 @@ const FACE_BY_MOOD: Record<MoodState, CatFace> = {
   }
 }
 
-export function buildDefaultCatSvg(mood: MoodState): string {
+export function buildDefaultCatSvgMarkup(mood: MoodState): string {
   const face = FACE_BY_MOOD[mood]
   return `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zuiti cow-cat ${mood} 奶牛猫" viewBox="0 0 256 256">
 <defs>
@@ -117,7 +117,26 @@ export function buildDefaultCatSvg(mood: MoodState): string {
 </filter>
 </defs>
 <g filter="url(#softShadow)">
+<g id="zuiti-part-body">
 <ellipse cx="128" cy="210" rx="64" ry="14" fill="#111827" opacity=".12"/>
+</g>
+<g id="zuiti-part-tail">
+<path d="M198 162 C232 158 229 207 190 198" fill="none" stroke="#111827" stroke-width="10" stroke-linecap="round"/>
+<circle cx="197" cy="162" r="8" fill="${face.accent}" stroke="#111827" stroke-width="4"/>
+</g>
+<g id="zuiti-part-left-foot">
+<ellipse cx="96" cy="190" rx="18" ry="10" fill="#fff7ed" stroke="#111827" stroke-width="6"/>
+</g>
+<g id="zuiti-part-right-foot">
+<ellipse cx="160" cy="190" rx="18" ry="10" fill="#fff7ed" stroke="#111827" stroke-width="6"/>
+</g>
+<g id="zuiti-part-left-arm">
+<path d="M74 168 C57 157 49 139 55 119" fill="none" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+</g>
+<g id="zuiti-part-right-arm">
+<path d="M182 168 C199 157 207 139 201 119" fill="none" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+</g>
+<g id="zuiti-part-head">
 <path d="M67 83 L82 35 L115 70 Z" fill="#fff7ed" stroke="#111827" stroke-width="7" stroke-linejoin="round"/>
 <path d="M189 83 L174 35 L141 70 Z" fill="#fff7ed" stroke="#111827" stroke-width="7" stroke-linejoin="round"/>
 <path d="M82 55 L88 78 L101 71 Z" fill="#f9a8d4" opacity=".82"/>
@@ -125,19 +144,22 @@ export function buildDefaultCatSvg(mood: MoodState): string {
 <circle cx="128" cy="125" r="74" fill="#fff7ed" stroke="#111827" stroke-width="7"/>
 <path d="M75 95 C82 58 116 48 129 54 C115 72 99 84 75 95 Z" fill="#111827"/>
 <path d="M145 57 C170 56 189 78 195 105 C174 98 157 84 145 57 Z" fill="#111827"/>
-<path d="M74 168 C57 157 49 139 55 119" fill="none" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
-<path d="M182 168 C199 157 207 139 201 119" fill="none" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+<g id="zuiti-part-face">
 ${face.eyeLeft}
 ${face.eyeRight}
 <path d="M124 128 L132 128 L128 136 Z" fill="#f472b6" stroke="#111827" stroke-width="4" stroke-linejoin="round"/>
 ${face.mouth}
 ${face.blush}
 <path d="M75 105 h-25 M77 121 h-28 M181 105 h25 M179 121 h28" stroke="#111827" stroke-width="4" stroke-linecap="round" opacity=".72"/>
-<path d="M198 162 C232 158 229 207 190 198" fill="none" stroke="#111827" stroke-width="10" stroke-linecap="round"/>
-<circle cx="197" cy="162" r="8" fill="${face.accent}" stroke="#111827" stroke-width="4"/>
 ${face.extra}
 </g>
+</g>
+</g>
 </svg>`
+}
+
+export function buildDefaultCatSvg(mood: MoodState): string {
+  return buildDefaultCatSvgMarkup(mood)
 }
 
 export function buildDefaultCatSvgDataUrl(mood: MoodState): string {

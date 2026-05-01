@@ -6,7 +6,7 @@ import { queueMemoryRefresh } from './memory/analyze'
 import { feed, tokenStateText } from './token/economy'
 import { initializeRuntimeContext } from './context/runtime'
 import { getContextManager } from './context/snapshot'
-import { resolveActionForReply } from './skills/orchestrator'
+import { resolveActivityForReply } from './skills/orchestrator'
 import { startTriggers, actSpontaneous, noteUserInteraction, getMood, setMood } from './behavior'
 import { getSettings, patchSettings } from './vision'
 
@@ -47,8 +47,8 @@ export function registerIpc(win: BrowserWindow): void {
       win.webContents.send(IPC.PET_SPEAK, reply.dialogue)
     }
     queueMemoryRefresh()
-    void resolveActionForReply(reply, getProvider()).then((action) => {
-      if (action && !win.isDestroyed()) win.webContents.send(IPC.PET_ACTION, action)
+    void resolveActivityForReply(reply, getProvider()).then((activity) => {
+      if (!win.isDestroyed()) win.webContents.send(IPC.PET_ACTIVITY, activity)
     })
     return { ok: true }
   })
