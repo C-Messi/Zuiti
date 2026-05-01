@@ -1,0 +1,44 @@
+{
+  "id": "default-cat",
+  "title": "Default cow-cat resource skeleton",
+  "requiredParts": ["head", "ears", "tail"],
+  "renderOrder": [
+    "body",
+    "tail",
+    "left_foot",
+    "right_foot",
+    "left_arm",
+    "right_arm",
+    "ears",
+    "head",
+    "face"
+  ],
+  "parts": {
+    "head": {
+      "label": "Head",
+      "path": "parts/head.svg",
+      "transformOrigin": "50% 70%"
+    },
+    "ears": {
+      "label": "Ears",
+      "path": "parts/ears.svg",
+      "transformOrigin": "50% 72%"
+    },
+    "tail": {
+      "label": "Tail",
+      "path": "parts/tail.svg",
+      "transformOrigin": "8% 20%"
+    }
+  },
+  "motionTools": [
+    "idle_breathe",
+    "nod",
+    "shake_head",
+    "wave",
+    "hop",
+    "sing",
+    "tilt_head",
+    "perk_ears",
+    "swish_tail"
+  ]
+}

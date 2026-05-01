@@ -26,6 +26,8 @@ SOUL -> memory -> skill index -> recent window -> current event
 - `src/preload/`：安全暴露给 renderer 的 `window.zuiti` API。
 - `src/renderer/src/`：React UI、Zustand store、IPC wiring、桌宠和气泡组件。
 - `src/shared/types.ts`：跨进程共享类型与 IPC channel 常量。
+- `pet_resources/`：renderer publicDir，存放内置宠物骨架资源、部件 SVG、动作元数据和 `PET_SKELETON_STANDARD.md`。
+- `resources/`：Electron 图标和构建资源，不放宠物骨架资源。
 - `docs/`：架构与模块文档。改动模块行为时同步更新对应文档。
 - `tests/`：Node test runner 单元测试，使用 `scripts/register-ts.cjs` 注册 TS 源码。
 - `memory/SOUL.md`：桌宠人格源文件，应纳入版本控制。
@@ -68,6 +70,8 @@ npm run build
 - 跨进程协议统一从 `src/shared/types.ts` 扩展；新增 IPC channel 时同步更新 preload API 和 renderer 类型。
 - renderer 只通过 `window.zuiti` 与主进程交互，不直接使用 Node/Electron 主进程能力。
 - 新增 UI 状态优先放在现有 renderer store / hook 结构中，保持 `PetView`、`BubbleLayer`、`SettingPanel` 职责清晰。
+- 宠物骨架资源放在 `pet_resources/`，并遵守 `pet_resources/PET_SKELETON_STANDARD.md`；不要把骨架资源放进 Electron 的 `resources/`。
+- 骨架动作只暴露受限语义 motion tool；新增 tool 时同步 shared 类型、主进程校验、renderer CSS、prompt 和测试。
 - 主进程后台任务应避免阻塞用户输入路径；文本回复优先使用最近完成的稳定快照。
 - 注释保持简短，只解释不明显的安全、隐私或异步时序原因。
 
@@ -118,6 +122,7 @@ skills/<skill_id>/
 
 - renderer/UI：`docs/modules/renderer.md`
 - brain/prompt/provider：`docs/modules/brain-agents.md`
+- pet skeleton resources：`pet_resources/PET_SKELETON_STANDARD.md`、`docs/modules/renderer.md`
 - skills：`docs/modules/skills.md`
 - memory：`docs/modules/memory.md`
 - vision/privacy：`docs/modules/vision.md`

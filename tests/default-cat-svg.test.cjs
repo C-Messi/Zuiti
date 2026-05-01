@@ -44,6 +44,7 @@ test('buildDefaultCatSvgMarkup exposes stable transformable part groups', () => 
   for (const id of [
     'zuiti-part-body',
     'zuiti-part-head',
+    'zuiti-part-ears',
     'zuiti-part-left-arm',
     'zuiti-part-right-arm',
     'zuiti-part-left-foot',
@@ -66,5 +67,6 @@ test('PetView no longer replaces pet with full action svgs', () => {
   assert.doesNotMatch(source, /activeSkillAction/)
   assert.doesNotMatch(source, /data:image\/svg\+xml;charset=utf-8,\$\{encodeURIComponent\(active/)
   assert.match(source, /activeActivity/)
-  assert.match(source, /buildDefaultCatSvgMarkup/)
+  assert.match(source, /renderRegisteredSkeletonMarkup/)
+  assert.match(source, /loadDefaultCatSkeletonResourcePackage/)
 })

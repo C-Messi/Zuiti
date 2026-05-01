@@ -10,7 +10,7 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()]
   },
   renderer: {
-    publicDir: resolve(__dirname, 'resources'),
+    publicDir: resolve(__dirname, 'pet_resources'),
     server: {
       host: '127.0.0.1'
     },

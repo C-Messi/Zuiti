@@ -73,3 +73,22 @@ test('default cat skeleton exposes required anchors and motion tools', () => {
     assert.ok(DEFAULT_CAT_SKELETON.motionTools.includes(tool), `missing tool ${tool}`)
   }
 })
+
+test('normalizeMotionPlan accepts semantic skeleton part motion tools', () => {
+  const plan = normalizeMotionPlan(
+    {
+      skeleton_id: 'default-cat',
+      commands: [
+        { tool: 'tilt_head', durationMs: 1200, params: { angleDeg: 14 } },
+        { tool: 'perk_ears', durationMs: 900, params: { angleDeg: -9 } },
+        { tool: 'swish_tail', durationMs: 1600, params: { angleDeg: 18, repeats: 3 } }
+      ]
+    },
+    'excited'
+  )
+
+  assert.deepEqual(
+    plan.commands.map((command) => command.tool),
+    ['tilt_head', 'perk_ears', 'swish_tail']
+  )
+})

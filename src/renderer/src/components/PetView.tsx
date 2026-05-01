@@ -1,6 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { usePetStore } from '../store/usePetStore'
-import { buildDefaultCatSvgMarkup } from '../pet/defaultCatSvg'
+import {
+  DEFAULT_CAT_RESOURCE_PACKAGE,
+  loadDefaultCatSkeletonResourcePackage,
+  renderRegisteredSkeletonMarkup
+} from '../pet/skeletonRegistry'
 import { DEFAULT_CAT_SKELETON } from '../pet/skeleton'
 import type { MoodState, PetActivity, PetAnchorId, PetMotionCommand } from '../../../shared/types'
 
@@ -61,6 +65,21 @@ export function PetView(): React.JSX.Element {
   const mood = usePetStore((s) => s.mood)
   const activeActivity = usePetStore((s) => s.activeActivity)
   const setActiveActivity = usePetStore((s) => s.setActiveActivity)
+  const [skeletonPackage, setSkeletonPackage] = useState(DEFAULT_CAT_RESOURCE_PACKAGE)
+
+  useEffect(() => {
+    let alive = true
+    loadDefaultCatSkeletonResourcePackage()
+      .then((pkg) => {
+        if (alive) setSkeletonPackage(pkg)
+      })
+      .catch(() => {
+        /* The built-in fallback keeps the pet visible if public resources fail. */
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!activeActivity) return
@@ -96,7 +115,7 @@ export function PetView(): React.JSX.Element {
       <div
         className={`zuiti-pet-svg w-44 h-44 select-none drop-shadow-lg transition-all duration-200 ${MOOD_CSS_CLASS[mood]}`}
         aria-label={mood}
-        dangerouslySetInnerHTML={{ __html: buildDefaultCatSvgMarkup(mood) }}
+        dangerouslySetInnerHTML={{ __html: renderRegisteredSkeletonMarkup(skeletonPackage, mood) }}
       />
       {prop && anchor && propSrc && (
         <img

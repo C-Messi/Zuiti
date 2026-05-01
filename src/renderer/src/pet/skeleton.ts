@@ -21,6 +21,7 @@ export const DEFAULT_CAT_SKELETON: PetSkeletonDefinition = {
     right_arm: { id: 'right_arm', label: 'Right arm' },
     left_foot: { id: 'left_foot', label: 'Left foot' },
     right_foot: { id: 'right_foot', label: 'Right foot' },
+    ears: { id: 'ears', label: 'Ears' },
     tail: { id: 'tail', label: 'Tail' },
     face: { id: 'face', label: 'Face' }
   },
@@ -32,5 +33,15 @@ export const DEFAULT_CAT_SKELETON: PetSkeletonDefinition = {
     beside_left: { x: 42, y: 130 },
     beside_right: { x: 214, y: 130 }
   },
-  motionTools: ['idle_breathe', 'nod', 'shake_head', 'wave', 'hop', 'sing']
+  motionTools: [
+    'idle_breathe',
+    'nod',
+    'shake_head',
+    'wave',
+    'hop',
+    'sing',
+    'tilt_head',
+    'perk_ears',
+    'swish_tail'
+  ]
 }

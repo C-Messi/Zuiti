@@ -14,7 +14,10 @@ export const MOTION_TOOLS: MotionToolId[] = [
   'shake_head',
   'wave',
   'hop',
-  'sing'
+  'sing',
+  'tilt_head',
+  'perk_ears',
+  'swish_tail'
 ]
 
 const MIN_DURATION_MS = 600

@@ -49,5 +49,9 @@ npm run build:mac
 - `memory/SOUL.md`
 - `memory/memory.example.md`
 - `skills/example-soft-wave/`
+- `resources/icon.png`
+- `pet_resources/` 下的内置宠物骨架资源与 `PET_SKELETON_STANDARD.md`
+
+`resources/` 保留给 Electron 图标和构建资源。renderer 的 publicDir 使用 `pet_resources/`，宠物骨架 manifest、部件 SVG、动作说明和 prompt 标准都应放在 `pet_resources/` 下。
 
 提交前建议运行 `npm run test:unit && npm run typecheck && npm run lint && npm run build`。

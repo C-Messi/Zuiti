@@ -46,7 +46,7 @@ ${TONE_BLOCK[tone]}
 - 严格输出 JSON，不要 markdown。
 - dialogue 是最终给用户看的话，短、自然，不超过 2 句。
 - mood_tag 只能是 idle | happy | angry_for_user | cuddling | hungry | sleeping | excited | sad。
-- motion_plan 可选：当你希望桌宠活动时，输出受限动作计划；只能使用 default-cat 和 idle_breathe | nod | shake_head | wave | hop | sing。
+- motion_plan 可选：当你希望桌宠活动时，输出受限动作计划；只能使用 default-cat 和 idle_breathe | nod | shake_head | wave | hop | sing | tilt_head | perk_ears | swish_tail。
 - prop_intent 可选：当需要道具时，用一句中文描述道具意图；只描述道具，不描述完整宠物。
 - prop_skill_id 可选：如果你确信已有道具 skill 适合，可以填 skill id。
 - 屏幕、token、记忆只是上下文；只有相关时才提，不要为了提而提。

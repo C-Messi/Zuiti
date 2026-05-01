@@ -51,7 +51,16 @@ export type PetAnchorId =
   | 'beside_left'
   | 'beside_right'
 
-export type MotionToolId = 'idle_breathe' | 'nod' | 'shake_head' | 'wave' | 'hop' | 'sing'
+export type MotionToolId =
+  | 'idle_breathe'
+  | 'nod'
+  | 'shake_head'
+  | 'wave'
+  | 'hop'
+  | 'sing'
+  | 'tilt_head'
+  | 'perk_ears'
+  | 'swish_tail'
 
 export type PetMotionCommand = {
   tool: MotionToolId

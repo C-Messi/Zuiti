@@ -95,6 +95,7 @@ body,
 
 #zuiti-part-head,
 #zuiti-part-face,
+#zuiti-part-ears,
 #zuiti-part-left-arm,
 #zuiti-part-right-arm,
 #zuiti-part-tail {
@@ -102,8 +103,13 @@ body,
 }
 
 #zuiti-part-head,
-#zuiti-part-face {
+#zuiti-part-face,
+#zuiti-part-ears {
   transform-origin: 50% 70%;
+}
+
+#zuiti-part-ears {
+  transform-origin: 50% 72%;
 }
 
 #zuiti-part-left-arm {
@@ -139,6 +145,11 @@ body,
   50% { transform: rotate(var(--motion-angle)); }
 }
 
+@keyframes zuiti-motion-perk-ears {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(var(--motion-angle)); }
+}
+
 @keyframes zuiti-motion-hop {
   0%, 100% { transform: translate(0, 0) scale(1); }
   45% { transform: translate(var(--motion-offset-x), var(--motion-offset-y)) scale(var(--motion-scale)); }
@@ -149,13 +160,23 @@ body,
 }
 
 .zuiti-motion-nod #zuiti-part-head,
-.zuiti-motion-nod #zuiti-part-face {
+.zuiti-motion-nod #zuiti-part-face,
+.zuiti-motion-nod #zuiti-part-ears {
   animation: zuiti-motion-nod var(--motion-duration) ease-in-out;
 }
 
 .zuiti-motion-shake_head #zuiti-part-head,
-.zuiti-motion-shake_head #zuiti-part-face {
+.zuiti-motion-shake_head #zuiti-part-face,
+.zuiti-motion-shake_head #zuiti-part-ears,
+.zuiti-motion-tilt_head #zuiti-part-head,
+.zuiti-motion-tilt_head #zuiti-part-face,
+.zuiti-motion-tilt_head #zuiti-part-ears,
+.zuiti-motion-swish_tail #zuiti-part-tail {
   animation: zuiti-motion-shake-head var(--motion-duration) ease-in-out;
+}
+
+.zuiti-motion-perk_ears #zuiti-part-ears {
+  animation: zuiti-motion-perk-ears var(--motion-duration) ease-in-out;
 }
 
 .zuiti-motion-wave #zuiti-part-right-arm,
