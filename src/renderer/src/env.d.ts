@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-import type { PetActivity, PetRenderPackage, Settings } from '../../shared/types'
+import type { PetActivity, PetRenderPackage, Settings, WindowDragPoint } from '../../shared/types'
 
 declare global {
   interface Window {
@@ -13,6 +13,9 @@ declare global {
       settingsGet: () => Promise<Settings>
       settingsSet: (patch: Partial<Settings>) => Promise<Settings>
       visionPause: (durationMs: number | null) => Promise<Settings>
+      windowDragStart: (point: WindowDragPoint) => Promise<{ ok: boolean }>
+      windowDragMove: (point: WindowDragPoint) => Promise<{ ok: boolean }>
+      windowDragEnd: () => Promise<{ ok: boolean }>
     }
   }
 }

@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain } from 'electron'
-import { IPC, type Settings } from '../shared/types'
+import { IPC, type Settings, type WindowDragPoint } from '../shared/types'
 import { getProvider, respond } from './brain'
 import { appendEvent, recent } from './memory/store'
 import { queueMemoryRefresh } from './memory/analyze'
@@ -14,6 +14,10 @@ import { loadPetPackage } from './pet/package'
 
 export function registerIpc(win: BrowserWindow): void {
   initializeRuntimeContext()
+  let dragOffset: { x: number; y: number } | null = null
+
+  const isWindowDragPoint = (point: WindowDragPoint): point is WindowDragPoint =>
+    Number.isFinite(point?.screenX) && Number.isFinite(point?.screenY)
 
   ipcMain.handle(IPC.USER_SAY, async (_e, text: string) => {
     noteUserInteraction()
@@ -63,6 +67,27 @@ export function registerIpc(win: BrowserWindow): void {
       visionPausedUntil: durationMs ? Date.now() + durationMs : null
     })
   )
+  ipcMain.handle(IPC.WINDOW_DRAG_START, (_e, point: WindowDragPoint) => {
+    if (!isWindowDragPoint(point) || win.isDestroyed()) return { ok: false }
+    const [x, y] = win.getPosition()
+    dragOffset = {
+      x: point.screenX - x,
+      y: point.screenY - y
+    }
+    return { ok: true }
+  })
+  ipcMain.handle(IPC.WINDOW_DRAG_MOVE, (_e, point: WindowDragPoint) => {
+    if (!dragOffset || !isWindowDragPoint(point) || win.isDestroyed()) return { ok: false }
+    win.setPosition(
+      Math.round(point.screenX - dragOffset.x),
+      Math.round(point.screenY - dragOffset.y)
+    )
+    return { ok: true }
+  })
+  ipcMain.handle(IPC.WINDOW_DRAG_END, () => {
+    dragOffset = null
+    return { ok: true }
+  })
 
   startTriggers((reason) => {
     void actSpontaneous(win, reason)

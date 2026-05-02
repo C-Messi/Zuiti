@@ -1,6 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { IPC, type PetActivity, type PetRenderPackage, type Settings } from '../shared/types'
+import {
+  IPC,
+  type PetActivity,
+  type PetRenderPackage,
+  type Settings,
+  type WindowDragPoint
+} from '../shared/types'
 
 const api = {
   userSay: (text: string): Promise<{ ok: boolean }> =>
@@ -26,7 +32,13 @@ const api = {
   settingsSet: (patch: Partial<Settings>): Promise<Settings> =>
     ipcRenderer.invoke(IPC.SETTINGS_SET, patch) as Promise<Settings>,
   visionPause: (durationMs: number | null): Promise<Settings> =>
-    ipcRenderer.invoke(IPC.VISION_PAUSE, durationMs) as Promise<Settings>
+    ipcRenderer.invoke(IPC.VISION_PAUSE, durationMs) as Promise<Settings>,
+  windowDragStart: (point: WindowDragPoint): Promise<{ ok: boolean }> =>
+    ipcRenderer.invoke(IPC.WINDOW_DRAG_START, point) as Promise<{ ok: boolean }>,
+  windowDragMove: (point: WindowDragPoint): Promise<{ ok: boolean }> =>
+    ipcRenderer.invoke(IPC.WINDOW_DRAG_MOVE, point) as Promise<{ ok: boolean }>,
+  windowDragEnd: (): Promise<{ ok: boolean }> =>
+    ipcRenderer.invoke(IPC.WINDOW_DRAG_END) as Promise<{ ok: boolean }>
 }
 
 if (process.contextIsolated) {

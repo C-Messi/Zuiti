@@ -41,6 +41,11 @@ export type Settings = {
   appBlacklist: string[]
 }
 
+export type WindowDragPoint = {
+  screenX: number
+  screenY: number
+}
+
 export type SkeletonId = string
 
 export type PetAnchorId = string
@@ -163,6 +168,9 @@ export const IPC = {
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',
   VISION_PAUSE: 'vision:pause',
+  WINDOW_DRAG_START: 'window:drag:start',
+  WINDOW_DRAG_MOVE: 'window:drag:move',
+  WINDOW_DRAG_END: 'window:drag:end',
   VISION_PEEK_PREVIEW: 'vision:peek:preview',
   VISION_PEEK_CANCEL: 'vision:peek:cancel',
   TOKEN_STATE: 'token:state'
