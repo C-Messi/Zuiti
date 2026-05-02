@@ -1,6 +1,7 @@
 import type { LLMProvider } from '../brain/provider'
 import type { MoodState, PetAnchorId, SkillManifest } from '../../shared/types'
 import { isValidPropAnchor, sanitizeSkillId, validatePropSvg } from './registry'
+import { loadPetPackage } from '../pet/package'
 
 export type SkillDraft = {
   id: string
@@ -19,13 +20,16 @@ const AUTHOR_SYSTEM = `你是嘴替桌宠的 SVG 道具绘制器。
 你要根据道具意图，生成一个透明背景、独立可渲染的 SVG 道具 skill。
 你只能画道具本身，例如麦克风、花、牌子、帽子、音符小物件。不要画完整宠物、身体、脸、背景场景、舞台或大范围特效。
 
+可用锚点：
+{{ANCHORS}}
+
 只输出严格 JSON：
 {
   "id": "kebab-case 英文或拼音 id",
   "title": "短标题",
   "triggers": ["触发词1", "触发词2"],
   "moodAffinity": ["happy"],
-  "anchor": "left_hand | right_hand | head_top | mouth | beside_left | beside_right",
+  "anchor": "从可用锚点中选择一个",
   "durationMs": 1800,
   "description": "一句话描述",
   "skillMarkdown": "简短 markdown，说明何时使用",
@@ -69,10 +73,13 @@ export async function authorSkillDraft(
   provider: LLMProvider,
   propIntent: string,
   mood: MoodState,
-  skillIndexText: string
+  skillIndexText: string,
+  root = process.cwd()
 ): Promise<SkillDraft> {
+  const anchors = Object.keys(loadPetPackage(root).anchors)
+  const anchorText = anchors.length > 0 ? anchors.join(' | ') : '（当前宠物包未声明锚点）'
   const raw = await provider.completeText(
-    AUTHOR_SYSTEM,
+    AUTHOR_SYSTEM.replace('{{ANCHORS}}', anchorText),
     `已有道具 skill 索引：\n${skillIndexText || '（暂无）'}\n\n道具意图：${propIntent}\n当前 mood：${mood}`,
     1800
   )
@@ -85,7 +92,8 @@ export async function authorSkillDraft(
   const title = typeof obj.title === 'string' ? obj.title.slice(0, 40) : id
   const description =
     typeof obj.description === 'string' ? obj.description.slice(0, 120) : propIntent.slice(0, 120)
-  const anchor = isValidPropAnchor(obj.anchor) ? obj.anchor : 'right_hand'
+  const fallbackAnchor = anchors[0] ?? 'right_hand'
+  const anchor = isValidPropAnchor(obj.anchor, root) ? obj.anchor : fallbackAnchor
 
   return {
     id,

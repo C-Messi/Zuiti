@@ -22,7 +22,13 @@ async function createReviewedSkill(
 
   for (let attempt = 0; attempt < MAX_AUTHOR_ATTEMPTS; attempt += 1) {
     try {
-      const draft = await authorSkillDraft(provider, propIntent, reply.mood_tag, skillIndexText)
+      const draft = await authorSkillDraft(
+        provider,
+        propIntent,
+        reply.mood_tag,
+        skillIndexText,
+        root
+      )
       const review = await reviewSkillDraft(provider, draft, propIntent)
       if (review.score < MIN_REVIEW_SCORE) continue
       writeSkillPackage(draftToManifest(draft, review.score), draft.skillMarkdown, draft.svg, root)
